@@ -10,6 +10,7 @@ This folder contains a standalone Node.js script that imports the issues defined
 - Optionally creates missing team labels.
 - Reuses existing project issues with the same title by default so reruns do not duplicate work.
 - Creates `blocks` relations from declared dependencies.
+- Falls back to a team-scoped import when no project matches but the provided selector matches the target team.
 
 ## Requirements
 
@@ -59,3 +60,4 @@ node scripts/linear-import/import-issues.mjs \
 - Dependency import uses Linear `blocks` relations.
 - When an issue says it depends on `B-001`, the script creates a relation so `B-001` blocks that issue.
 - Missing labels are logged as warnings unless `--create-missing-labels` is supplied.
+- If the Linear workspace has no matching project, the script can continue against the selected team without assigning a project.

@@ -12,10 +12,10 @@ const GRAPHQL_ENDPOINT = "https://api.linear.app/graphql";
 
 function printHelp() {
   console.log(`Usage:
-  node scripts/linear-import/import-issues.mjs --project <id|slug|name> [options]
+  node scripts/linear-import/import-issues.mjs --project <id|slugId|name> [options]
 
 Required:
-  --project <value>          Linear project UUID, slug, or exact project name.
+  --project <value>          Linear project UUID, slugId, or exact project name.
 
 Optional:
   --api-key <value>          Linear personal API key or OAuth Authorization value.
@@ -215,7 +215,7 @@ function resolveUniqueMatch(items, selector, rawValue, description) {
 }
 
 function pickTeam(project, allTeams, teamArg) {
-  const projectTeams = Array.isArray(project.teams?.nodes) ? project.teams.nodes : [];
+  const projectTeams = Array.isArray(project?.teams?.nodes) ? project.teams.nodes : [];
 
   if (teamArg) {
     return resolveUniqueMatch(
@@ -236,6 +236,12 @@ function pickTeam(project, allTeams, teamArg) {
   }
 
   throw new Error("Could not infer a team from the selected project. Pass --team explicitly.");
+}
+
+function tryResolveMatch(items, selector, rawValue) {
+  const target = normalizeMatchValue(rawValue);
+  const matches = items.filter((item) => selector(item).some((candidate) => normalizeMatchValue(candidate) === target));
+  return matches.length === 1 ? matches[0] : null;
 }
 
 function colorForLabel(name) {
@@ -316,14 +322,9 @@ class LinearClient {
     return { data: payload.data, errors: [] };
   }
 
-  async loadProjectsAndTeams() {
-    const query = `
-      query ProjectsAndTeams {
-        projects(first: 250, includeArchived: true) {
-          nodes {
-            id
-            name
-            slug
+  async loadProjectsAndTeams({ includeProjectTeams }) {
+    const projectTeamsSelection = includeProjectTeams
+      ? `
             teams {
               nodes {
                 id
@@ -331,6 +332,17 @@ class LinearClient {
                 name
               }
             }
+        `
+      : "";
+
+    const query = `
+      query ProjectsAndTeams {
+        projects(first: 250, includeArchived: true) {
+          nodes {
+            id
+            name
+            slugId
+${projectTeamsSelection}
           }
         }
         teams(first: 250, includeArchived: true) {
@@ -393,6 +405,29 @@ class LinearClient {
       return [];
     }
     return result.data.project.issues.nodes;
+  }
+
+  async loadTeamIssues(teamId) {
+    const query = `
+      query TeamIssues($teamId: String!) {
+        team(id: $teamId) {
+          id
+          issues(first: 250, includeArchived: true) {
+            nodes {
+              id
+              identifier
+              title
+            }
+          }
+        }
+      }
+    `;
+
+    const result = await this.request(query, { teamId }, { optional: true });
+    if (result.errors.length > 0 || !result.data?.team) {
+      return [];
+    }
+    return result.data.team.issues.nodes;
   }
 
   async createLabel(input) {
@@ -536,25 +571,49 @@ async function main() {
   }
 
   const client = new LinearClient(options.apiKey);
-  const { projects, teams } = await client.loadProjectsAndTeams();
-  const project = resolveUniqueMatch(
+  const { projects, teams } = await client.loadProjectsAndTeams({
+    includeProjectTeams: !options.team,
+  });
+  let project = tryResolveMatch(
     projects,
-    (candidate) => [candidate.id, candidate.slug, candidate.name],
+    (candidate) => [candidate.id, candidate.slugId, candidate.name],
     options.project,
-    "project",
   );
-  const team = pickTeam(project, teams, options.team);
+  let team = null;
+
+  if (project) {
+    team = pickTeam(project, teams, options.team);
+  } else {
+    team = resolveUniqueMatch(
+      teams,
+      (candidate) => [candidate.id, candidate.key, candidate.name],
+      options.team ?? options.project,
+      "team",
+    );
+
+    const projectLikeTeam = normalizeMatchValue(options.project) === normalizeMatchValue(options.team ?? options.project);
+    if (!projectLikeTeam) {
+      throw new Error(`No project matched \"${options.project}\".`);
+    }
+  }
 
   const allLabels = await client.loadIssueLabels();
   const teamLabels = allLabels.filter((label) => !label.team || label.team.id === team.id);
-  const existingProjectIssues = await client.loadProjectIssues(project.id);
-  const issuesByTitle = new Map(existingProjectIssues.map((issue) => [issue.title, issue]));
+  const existingIssues = project
+    ? await client.loadProjectIssues(project.id)
+    : await client.loadTeamIssues(team.id);
+  const issuesByTitle = new Map(existingIssues.map((issue) => [issue.title, issue]));
   const importedIssues = new Map();
   const skippedIssues = [];
   const warnings = [];
 
   console.log(`Parsed ${issues.length} issues from ${options.input}`);
-  console.log(`Target project: ${project.name} (${project.id})`);
+  if (project) {
+    console.log(`Target project: ${project.name} (${project.id})`);
+  } else {
+    console.log(`Target project: none matched; importing into team scope only`);
+    warnings.push(`No project matched \"${options.project}\". Falling back to team-only import for ${team.name}.`);
+  }
   console.log(`Target team: ${team.key ?? team.name} (${team.id})`);
   if (options.dryRun) {
     console.log("Dry run enabled. No Linear data will be created.");
@@ -594,7 +653,7 @@ async function main() {
 
     const created = await client.createIssue({
       teamId: team.id,
-      projectId: project.id,
+      ...(project ? { projectId: project.id } : {}),
       title: issue.title,
       description: issue.description,
       labelIds,
