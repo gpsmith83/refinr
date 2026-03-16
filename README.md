@@ -20,6 +20,7 @@ The documentation has been split so that product definition, architecture, stack
 - [docs/implementation-roadmap.md](docs/implementation-roadmap.md): MVP milestones and sequencing.
 - [docs/acceptance-criteria.md](docs/acceptance-criteria.md): Acceptance criteria for the core MVP workflows.
 - [docs/initial-delivery-backlog.md](docs/initial-delivery-backlog.md): Initial INVEST-oriented MVP backlog.
+- [docs/linear-ready-backlog.md](docs/linear-ready-backlog.md): Derived tracker-oriented backlog artifact.
 
 ## Current Product Direction
 
