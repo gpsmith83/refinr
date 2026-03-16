@@ -18,7 +18,7 @@ The backlog is structured to follow INVEST principles as closely as possible:
 - Epics are aligned to roadmap milestones.
 - Tickets are written as backlog-ready implementation items, not high-level aspirations.
 - Dependencies are listed only where they materially affect sequencing.
-- Acceptance criteria here are intentionally concise and should be expanded in the tracker if needed.
+- Acceptance criteria here are written as observable outcomes that should remain usable when copied directly into a tracker.
 - Ticket IDs are provisional and intended for documentation use until moved into a tracking system.
 
 ## Epic 0: Foundation
@@ -43,8 +43,9 @@ Dependencies:
 
 Acceptance:
 
-- The Angular app runs locally.
-- The app has navigable placeholder routes for the core product areas.
+- The Angular application starts successfully in the local development environment.
+- Sign-in, workspace, project, and requirement placeholder routes resolve through the configured router.
+- A minimal application shell renders consistently across those routes.
 
 ### B-002 Establish Express API skeleton
 
@@ -64,8 +65,9 @@ Dependencies:
 
 Acceptance:
 
-- The API runs locally.
-- A health endpoint responds successfully.
+- The Express API starts successfully in the local development environment.
+- The health endpoint returns a successful response from the running API.
+- Baseline middleware for logging, security headers, and error handling is wired into request handling.
 
 ### B-003 Provision PostgreSQL and baseline schema tooling
 
@@ -85,8 +87,9 @@ Dependencies:
 
 Acceptance:
 
-- Database migrations run successfully.
-- Baseline tables exist and are queryable.
+- Drizzle migrations run successfully against the configured PostgreSQL instance.
+- Baseline tables for users, workspaces, projects, and requirements are created.
+- The created tables can be queried successfully from the application.
 
 ### B-004 Implement GitHub OAuth session authentication
 
@@ -107,8 +110,9 @@ Dependencies:
 
 Acceptance:
 
-- A user can sign in with GitHub OAuth.
-- Authenticated sessions persist across requests.
+- A new or existing user can complete sign-in with GitHub OAuth.
+- The authenticated user record is persisted or updated in application storage.
+- The resulting session remains valid across subsequent authenticated requests.
 
 ### B-005 Implement workspace and project creation flow
 
@@ -130,8 +134,10 @@ Dependencies:
 
 Acceptance:
 
-- An authenticated user can create a workspace and a project.
-- The project appears on the project dashboard.
+- An authenticated user can create a new workspace from the product UI.
+- The same user can create a project within that workspace.
+- The created project appears on the project dashboard for that workspace.
+- Workspace and project ownership are persisted correctly.
 
 Split guidance:
 
@@ -156,7 +162,8 @@ Dependencies:
 
 Acceptance:
 
-- The core stack can be launched locally from a single documented workflow.
+- Frontend, API, and database services can be started locally from one documented workflow.
+- The documented startup path is sufficient for another developer to reach a running local stack.
 
 ## Epic 1: Requirement Intake And Persistence
 
@@ -180,8 +187,9 @@ Dependencies:
 
 Acceptance:
 
-- Requirements can be created and retrieved within a project.
-- Requirements are workspace-scoped through project ownership.
+- A requirement can be created for a specific project through the backend API.
+- A requirement can be retrieved individually and through a project-scoped list API.
+- Requirement access is correctly scoped through project and workspace ownership.
 
 ### B-102 Build requirement creation UI
 
@@ -201,8 +209,9 @@ Dependencies:
 
 Acceptance:
 
-- A user can create a requirement from the project interface.
-- The created requirement appears immediately in the UI.
+- A project user can create a requirement from the project interface using a short freeform prompt.
+- Optional context notes can be entered during creation.
+- The created requirement appears immediately in the UI after successful save.
 
 ### B-103 Build project dashboard requirement listing
 
@@ -222,7 +231,9 @@ Dependencies:
 
 Acceptance:
 
-- Project requirements are listed and link to requirement detail views.
+- Project requirements are listed on the project dashboard.
+- Each listed requirement shows enough identifying information to distinguish it in the dashboard.
+- Each listed requirement links to its requirement detail view.
 
 ### B-104 Build requirement detail page shell
 
@@ -242,7 +253,9 @@ Dependencies:
 
 Acceptance:
 
-- A requirement detail page exists and loads persisted requirement data.
+- The requirement detail page loads persisted requirement data for the selected requirement.
+- The page displays the initial prompt and current status.
+- The page includes visible sections for conversation history, summary state, and readiness state.
 
 ### B-105 Persist refinement sessions and requirement messages
 
@@ -262,7 +275,9 @@ Dependencies:
 
 Acceptance:
 
-- Requirement messages can be stored and retrieved in order for a given requirement.
+- Refinement sessions can be created and linked to a requirement.
+- Requirement messages are stored with the correct requirement and session linkage.
+- Stored messages are retrieved in the correct chronological order.
 
 ## Epic 2: Guided Refinement Loop
 
@@ -286,7 +301,9 @@ Dependencies:
 
 Acceptance:
 
-- The backend can call the configured provider through an internal abstraction.
+- The backend calls the configured AI provider through an internal provider abstraction rather than vendor-specific logic in domain code.
+- The first provider adapter can successfully execute a provider call.
+- Provider usage metadata is captured for the call.
 
 ### B-202 Implement initial refinement session start flow
 
@@ -307,8 +324,9 @@ Dependencies:
 
 Acceptance:
 
-- A user can start refinement from a requirement page.
-- The system produces the first guided question.
+- A user can trigger refinement from the requirement page.
+- The system creates a refinement session linked to the requirement.
+- The system returns and displays the first guided question for that session.
 
 Split guidance:
 
@@ -332,7 +350,9 @@ Dependencies:
 
 Acceptance:
 
-- Questions and answers remain visible after page refresh.
+- System questions and user answers are persisted as requirement messages.
+- The saved conversation history reloads correctly after page refresh.
+- Message ordering remains stable across reloads.
 
 ### B-204 Generate summary snapshots after refinement turns
 
@@ -352,7 +372,9 @@ Dependencies:
 
 Acceptance:
 
-- Summary state updates after meaningful user responses.
+- A new summary snapshot is generated after a meaningful refinement response.
+- The generated snapshot is persisted and linked to the correct requirement or session.
+- The latest summary state becomes available for display in the UI.
 
 ### B-205 Compute basic readiness state
 
@@ -370,7 +392,9 @@ Dependencies:
 
 Acceptance:
 
-- The backend can derive readiness dimensions and total score for a requirement.
+- The backend derives readiness dimensions for a requirement using the documented rubric.
+- The backend calculates a total readiness score for the requirement.
+- The resulting readiness state is persisted or otherwise made available for later retrieval.
 
 ### B-206 Render readiness score and missing information in the UI
 
@@ -388,8 +412,9 @@ Dependencies:
 
 Acceptance:
 
-- Readiness dimensions are visible as complete, partial, or missing.
-- The UI highlights missing information preventing ticket generation.
+- Readiness dimensions are visible in the requirement UI as complete, partial, or missing.
+- The total readiness score is visible to the user.
+- The UI highlights missing information that is preventing ticket generation.
 
 ## Epic 3: Persona Orchestration And Readiness Gate
 
@@ -412,7 +437,9 @@ Dependencies:
 
 Acceptance:
 
-- Persona invocations can be stored and reviewed for a requirement.
+- Persona invocations are stored with the associated requirement and refinement session.
+- Invocation reason and contributed dimensions are retained.
+- Stored invocation history can be retrieved for review.
 
 ### B-302 Implement orchestration rules for default persona progression
 
@@ -433,7 +460,9 @@ Dependencies:
 
 Acceptance:
 
-- The system can recommend the next persona using defined rules.
+- The system evaluates requirement state and readiness gaps to recommend the next persona.
+- The recommendation follows the documented default progression rules.
+- The recommendation can be returned in a form usable by the UI.
 
 ### B-303 Implement specialist persona trigger rules
 
@@ -451,7 +480,8 @@ Dependencies:
 
 Acceptance:
 
-- Non-trivial requirements can trigger specialist personas for clear reasons.
+- Non-trivial requirements can trigger specialist personas based on documented rules.
+- The trigger result includes a clear reason for invoking the specialist persona.
 
 ### B-304 Build hybrid persona control actions in the UI
 
@@ -471,7 +501,9 @@ Dependencies:
 
 Acceptance:
 
-- The user can accept or skip a suggested persona and see why it was suggested.
+- The UI shows the recommended persona and the reason it was suggested.
+- The user can accept or skip the recommendation.
+- Where permitted, the user can manually request a persona through the UI.
 
 Split guidance:
 
@@ -494,7 +526,8 @@ Dependencies:
 
 Acceptance:
 
-- Ticket generation is blocked when readiness is insufficient.
+- Ticket generation is blocked when blocking readiness dimensions are insufficient.
+- The blocked state is deterministically derived from the documented readiness rules.
 
 ### B-306 Implement readiness override capture and marking
 
@@ -513,8 +546,9 @@ Dependencies:
 
 Acceptance:
 
-- A user can explicitly override the readiness gate.
-- Override state is captured and reflected in downstream ticket data.
+- The user can explicitly override the readiness gate from the product flow.
+- The override action is persisted as part of refinement history.
+- Downstream ticket data is marked to reflect that the requirement was exported under override.
 
 ## Epic 4: Ticketization And Review
 
@@ -538,7 +572,9 @@ Dependencies:
 
 Acceptance:
 
-- Ticket candidates can be stored and retrieved for a requirement.
+- Ticket candidates can be stored for a specific requirement.
+- Ticket candidates can be retrieved individually and as a requirement-scoped list.
+- Candidate status and core metadata are retained.
 
 ### B-402 Build ticket generation service
 
@@ -559,7 +595,9 @@ Dependencies:
 
 Acceptance:
 
-- A ticket-ready requirement can produce one or more ticket candidates.
+- A ticket-ready requirement can produce one or more flat ticket candidates.
+- Each generated candidate includes title, description, acceptance criteria, and assumptions.
+- Generated candidates remain linked to the source requirement.
 
 ### B-403 Build ticket review interface
 
@@ -579,7 +617,9 @@ Dependencies:
 
 Acceptance:
 
-- Users can inspect and approve individual ticket candidates.
+- Users can view the list of ticket candidates for a requirement.
+- Users can inspect individual ticket candidate details.
+- Users can approve individual ticket candidates from the review UI.
 
 Split guidance:
 
@@ -602,7 +642,9 @@ Dependencies:
 
 Acceptance:
 
-- Users can split one ticket into multiple candidates and merge related candidates.
+- A user can split one over-broad ticket candidate into multiple candidates.
+- A user can merge related ticket candidates that were over-split.
+- The resulting ticket set remains linked to the originating requirement.
 
 ### B-405 Implement dependency and ordering editing
 
@@ -622,7 +664,9 @@ Dependencies:
 
 Acceptance:
 
-- Users can define or edit dependencies between ticket candidates.
+- Users can define dependencies between ticket candidates.
+- Users can edit existing dependency or sequencing information.
+- Updated dependency information persists with the ticket set.
 
 ## Epic 5: Linear Export
 
@@ -645,7 +689,9 @@ Dependencies:
 
 Acceptance:
 
-- A project can store and validate a Linear connection.
+- A project can store one Linear destination for MVP use.
+- The stored Linear connection is validated against the configured credentials and target workflow.
+- Invalid connection details are rejected rather than silently stored.
 
 ### B-502 Build Linear connection UI
 
@@ -663,7 +709,8 @@ Dependencies:
 
 Acceptance:
 
-- A project user can configure and save one Linear destination through the UI.
+- A project user can enter and save one Linear destination through the UI.
+- The UI surfaces connection validation success or failure.
 
 ### B-503 Implement export batch model and APIs
 
@@ -683,7 +730,9 @@ Dependencies:
 
 Acceptance:
 
-- Export actions are recorded as batches with per-ticket status.
+- Each export attempt is recorded as an export batch.
+- Each exported ticket candidate is recorded as a per-ticket batch item.
+- Per-ticket export status is retrievable after the export attempt.
 
 ### B-504 Implement Linear issue creation adapter
 
@@ -702,7 +751,9 @@ Dependencies:
 
 Acceptance:
 
-- Approved ticket candidates can be exported to Linear and mapped back to created issues.
+- Approved ticket candidates can be exported to Linear as issues.
+- Returned Linear identifiers are persisted.
+- Created issues remain mapped back to their source ticket candidates.
 
 ### B-505 Surface export results in the UI
 
@@ -721,7 +772,8 @@ Dependencies:
 
 Acceptance:
 
-- Users can see export results for each ticket candidate.
+- The UI shows export success or failure for each ticket candidate in the export batch.
+- The UI shows downstream Linear identifiers for successfully created issues.
 
 ### B-506 Implement retryable partial export handling
 
@@ -741,7 +793,9 @@ Dependencies:
 
 Acceptance:
 
-- Partial export failures are visible and retryable without duplicating successful issues.
+- Partial export failures are visible to the user.
+- Failed export items can be retried without duplicating already successful issues.
+- Successful mappings remain intact across retries.
 
 ## Epic 6: Repository Context Ingestion
 
@@ -765,7 +819,8 @@ Dependencies:
 
 Acceptance:
 
-- A project can connect a GitHub repository.
+- A project can store a GitHub repository connection.
+- Repository metadata is persisted against the correct project.
 
 ### B-602 Build GitHub repository connection UI
 
@@ -784,6 +839,7 @@ Dependencies:
 Acceptance:
 
 - A project user can configure a GitHub repository connection through the UI.
+- The UI makes it clear which repository is currently connected.
 
 ### B-603 Build context source recommendation and selection flow
 
@@ -803,7 +859,9 @@ Dependencies:
 
 Acceptance:
 
-- A user can choose which repository context sources are included.
+- The system recommends likely repository context sources.
+- The user can choose which sources are included or excluded.
+- The selected source set is persisted for later ingestion.
 
 ### B-604 Implement repository context ingestion job pipeline
 
@@ -822,7 +880,9 @@ Dependencies:
 
 Acceptance:
 
-- The system can ingest approved context sources into a stored snapshot.
+- Approved context sources are fetched and parsed through the ingestion pipeline.
+- The ingestion result is stored as a repository context snapshot.
+- The snapshot is linked to the correct project.
 
 ### B-605 Persist citations and context freshness metadata
 
@@ -841,7 +901,9 @@ Dependencies:
 
 Acceptance:
 
-- Context snapshots retain source citations and freshness metadata.
+- Repository context snapshots retain source citations.
+- Repository context snapshots retain freshness or sync metadata.
+- Citation and freshness data are retrievable with the snapshot.
 
 ### B-606 Apply repository context in summaries and ticket generation
 
@@ -862,7 +924,9 @@ Dependencies:
 
 Acceptance:
 
-- Refinement outputs can reference repository context while preserving direct user intent.
+- Summary generation can reference repository context from approved snapshots.
+- Ticket generation can reference repository context from approved snapshots.
+- Direct user answers remain authoritative when they conflict with repository context.
 
 ### B-607 Add on-demand repository context refresh
 
@@ -881,7 +945,8 @@ Dependencies:
 
 Acceptance:
 
-- Users can refresh project context and see current freshness state.
+- Users can trigger a repository context refresh on demand.
+- The latest context freshness state is visible after refresh completes.
 
 ## Epic 7: Hardening And Alpha Readiness
 
@@ -905,7 +970,8 @@ Dependencies:
 
 Acceptance:
 
-- Retryable background failures recover cleanly or surface actionable terminal errors.
+- Retryable ingestion and export job failures recover automatically where appropriate.
+- Terminal failures surface actionable error information rather than failing silently.
 
 ### B-702 Add request and job correlation logging
 
@@ -924,7 +990,9 @@ Dependencies:
 
 Acceptance:
 
-- Core flows can be traced across API and worker execution via shared identifiers.
+- API requests include a request identifier in structured logging.
+- Background jobs include a job identifier in structured logging.
+- Related API and worker activity can be traced through shared identifiers.
 
 ### B-703 Harden workspace isolation and permission checks
 
@@ -944,7 +1012,8 @@ Dependencies:
 
 Acceptance:
 
-- Cross-workspace access is rejected for project and requirement resources.
+- Project and requirement access is restricted to authorized workspace members.
+- Cross-workspace access attempts are rejected for project and requirement resources.
 
 ### B-704 Implement explicit failure-state UX for external dependency errors
 
@@ -965,7 +1034,8 @@ Dependencies:
 
 Acceptance:
 
-- Users see meaningful failure states for core external integration errors.
+- Users see explicit failure states for AI, repository, and Linear errors.
+- The UI distinguishes retryable errors from terminal failures where possible.
 
 ### B-705 Implement audit retrieval for refinement and export history
 
@@ -985,7 +1055,9 @@ Dependencies:
 
 Acceptance:
 
-- A completed requirement exposes audit history across refinement and export activities.
+- A completed requirement exposes persona history.
+- A completed requirement exposes readiness history.
+- A completed requirement exposes export history and repository snapshot history.
 
 ### B-706 Implement full provider payload audit retention and retrieval
 
@@ -1006,8 +1078,9 @@ Dependencies:
 
 Acceptance:
 
-- Provider payload history is stored and retrievable for a requirement.
-- Ordinary logs do not expose raw provider payloads.
+- Full provider request and response payload history is stored for a requirement.
+- Stored provider payload history is retrievable for audit purposes.
+- Ordinary logs do not expose raw provider payload content.
 
 ### B-707 Validate normal-turn responsiveness against MVP target
 
@@ -1027,7 +1100,9 @@ Dependencies:
 
 Acceptance:
 
-- Typical refinement turns complete within the documented 10-second target under representative MVP conditions.
+- Representative refinement turns are measured under MVP-like conditions.
+- Typical refinement turns complete within the documented 10-second target under those conditions.
+- Slower operations surface an explicit in-progress state to the user.
 
 ## Backlog Notes
 
