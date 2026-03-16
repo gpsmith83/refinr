@@ -130,6 +130,8 @@ Rationale:
 - Deployable on self-hosted infrastructure or generic cloud compute
 - Reverse proxy via Caddy or Nginx
 
+For local development, the default Docker Compose workflow should include the worker alongside the frontend, API, and PostgreSQL services so the team has one standard startup path.
+
 Initial production shape:
 
 - Angular frontend container or static asset host

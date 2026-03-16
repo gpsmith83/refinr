@@ -25,6 +25,32 @@ The backlog is structured to follow INVEST principles as closely as possible:
 
 Aligned roadmap milestone: Milestone 0
 
+### B-000 Establish repository bootstrap and developer workflow
+
+Value:
+
+- Makes the repository implementable by a team starting from zero local knowledge.
+
+Scope:
+
+- Define the repository structure for frontend, API, shared code, and worker runtime areas.
+- Choose and document the package manager and required Node.js version.
+- Create standard scripts for install, dev, build, lint, test, database migration, and seed workflows.
+- Add environment file templates and document the required variables for local development.
+- Document the exact local bootstrap flow, including the commands to install dependencies, create local environment files, start the database, run migrations, and verify that the repository is ready for implementation.
+
+Dependencies:
+
+- None
+
+Acceptance:
+
+- The repository contains a documented developer bootstrap path that assumes no prior project knowledge.
+- The required Node.js version and package manager are explicitly stated and enforced or validated by the repository tooling.
+- Standard scripts exist for development, build, lint, test, migration, and seed or equivalent local data setup workflows.
+- Environment variable templates exist for local development and list the required values for frontend, API, database, session, and integration-related configuration.
+- A developer starting from a fresh clone can follow the documented bootstrap flow and verify that the repository is ready for Milestone 0 implementation work.
+
 ### B-001 Establish Angular application shell
 
 Value:
@@ -105,6 +131,7 @@ Scope:
 
 Dependencies:
 
+- B-007
 - B-002
 - B-003
 
@@ -151,19 +178,73 @@ Value:
 
 Scope:
 
-- Create a local stack for frontend, API, and database.
-- Document local startup requirements.
+- Create a local stack for frontend, API, database, and worker.
+- Document how the local stack is started after repository bootstrap is complete.
+- Align the documented startup path with the standard scripts, environment templates, database migration workflow, and worker runtime startup requirements.
 
 Dependencies:
 
+- B-000
 - B-001
+- B-002
+- B-003
+- B-008
+
+Acceptance:
+
+- Frontend, API, database, and worker services can be started locally from one documented workflow.
+- The documented startup path is sufficient for another developer with no prior repository knowledge to reach a running local stack.
+- The documented path includes the expected pre-requisites, required environment files, migration steps, and the worker service needed before the application can be used locally.
+
+### B-007 Establish local secrets and external access prerequisites
+
+Value:
+
+- Prevents auth and integration work from stalling on undocumented credential and sandbox requirements.
+
+Scope:
+
+- Document the local secret requirements for GitHub OAuth, session security, Linear access, and the primary AI provider.
+- Define how developers obtain or are provisioned with non-production credentials and allowed test destinations.
+- Add environment template entries and setup guidance for required secrets without exposing real values.
+- Document where each secret is stored locally, where it is used in the application, and how a developer can confirm that setup is complete before starting auth or integration tickets.
+
+Dependencies:
+
+- B-000
+
+Acceptance:
+
+- The repository documentation explicitly lists the local secrets and external accounts required for GitHub OAuth, session configuration, Linear integration, and AI provider access.
+- The setup guidance states how a developer obtains approved non-production credentials or sandbox destinations for each external dependency.
+- Local environment templates include the required secret variable names without embedding live credential values.
+- A developer can verify whether their local machine is ready to begin auth and integration implementation without relying on tribal knowledge or production credentials.
+
+### B-008 Establish worker runtime and job execution skeleton
+
+Value:
+
+- Creates the missing runtime needed for queue-backed ingestion, retries, and long-running background work.
+
+Scope:
+
+- Set up the worker process structure in the shared application codebase.
+- Configure pg-boss connection and baseline job registration conventions.
+- Add the command or script used to start the worker during local development and make sure it can also be used by the Docker Compose workflow.
+- Define a simple health or verification check so developers can confirm the worker is connected and able to execute jobs.
+
+Dependencies:
+
+- B-000
 - B-002
 - B-003
 
 Acceptance:
 
-- Frontend, API, and database services can be started locally from one documented workflow.
-- The documented startup path is sufficient for another developer to reach a running local stack.
+- The repository contains a worker runtime entry point aligned with the documented architecture and stack.
+- The worker can start locally against the configured PostgreSQL instance and connect to pg-boss successfully.
+- Baseline job registration conventions are documented so later tickets can add background jobs consistently.
+- A developer can run the documented worker start command and verify from a simple check or expected log output that it is ready to process jobs.
 
 ## Epic 1: Requirement Intake And Persistence
 
@@ -297,6 +378,7 @@ Scope:
 
 Dependencies:
 
+- B-007
 - B-002
 
 Acceptance:
@@ -416,6 +498,30 @@ Acceptance:
 - The total readiness score is visible to the user.
 - The UI highlights missing information that is preventing ticket generation.
 
+### B-207 Build live requirement summary panel
+
+Value:
+
+- Makes the system's synthesized understanding visible instead of leaving the user to infer it from conversation history.
+
+Scope:
+
+- Render the current requirement summary in the requirement detail experience.
+- Show the key synthesized sections for problem, outcome, actors, workflow, assumptions, open questions, and edge cases when available.
+- Refresh the displayed summary after meaningful refinement turns and reload the latest saved state on revisit.
+
+Dependencies:
+
+- B-104
+- B-204
+
+Acceptance:
+
+- The requirement UI shows what is currently known about the requirement based on the latest summary snapshot.
+- The summary panel presents the latest synthesized state after meaningful refinement responses.
+- The latest summary remains visible after page refresh or later revisit.
+- A developer can verify the panel by completing refinement turns, refreshing the page, and confirming that the latest saved summary is still shown.
+
 ## Epic 3: Persona Orchestration And Readiness Gate
 
 Aligned roadmap milestone: Milestone 3
@@ -522,7 +628,6 @@ Scope:
 Dependencies:
 
 - B-205
-- B-304
 
 Acceptance:
 
@@ -549,6 +654,32 @@ Acceptance:
 - The user can explicitly override the readiness gate from the product flow.
 - The override action is persisted as part of refinement history.
 - Downstream ticket data is marked to reflect that the requirement was exported under override.
+
+### B-307 Build readiness gate status and override UI
+
+Value:
+
+- Makes ticket-generation blocking behavior understandable and actionable instead of feeling like an unexplained system refusal.
+
+Scope:
+
+- Show when ticket generation is blocked by readiness rules.
+- Surface the specific blocking or weak readiness dimensions in the requirement UI.
+- Provide the explicit override action in the UI and reflect override status after it is used.
+
+Dependencies:
+
+- B-206
+- B-305
+- B-306
+
+Acceptance:
+
+- The UI explains why ticket generation is blocked when readiness requirements are not met.
+- The UI identifies the dimensions that are preventing ticket generation.
+- A user can explicitly override the readiness gate from the product UI.
+- The requirement UI reflects when downstream tickets are being generated under override.
+- A developer can verify the flow from the requirement screen without using the API directly.
 
 ## Epic 4: Ticketization And Review
 
@@ -668,6 +799,31 @@ Acceptance:
 - Users can edit existing dependency or sequencing information.
 - Updated dependency information persists with the ticket set.
 
+### B-406 Implement ticket candidate content editing
+
+Value:
+
+- Lets users turn generated ticket candidates into execution-ready backlog items before export.
+
+Scope:
+
+- Allow direct editing of ticket candidate title, description, acceptance criteria, and assumptions or equivalent execution guidance.
+- Support marking a ticket candidate as blocked by unresolved questions where needed.
+- Persist edited candidate content and reload it accurately in the review flow.
+
+Dependencies:
+
+- B-401
+- B-403
+
+Acceptance:
+
+- A user can edit ticket candidate content before export.
+- Edited ticket content persists across reload or later revisit.
+- A user can mark a ticket candidate as blocked by unresolved questions when needed.
+- Edited candidates remain linked to the originating requirement and candidate set.
+- A developer can verify the edit flow by changing a ticket, reloading the review view, and confirming the saved changes remain visible.
+
 ## Epic 5: Linear Export
 
 Aligned roadmap milestone: Milestone 5
@@ -685,6 +841,7 @@ Scope:
 
 Dependencies:
 
+- B-007
 - B-005
 
 Acceptance:
@@ -814,6 +971,7 @@ Scope:
 
 Dependencies:
 
+- B-007
 - B-004
 - B-005
 
@@ -876,6 +1034,7 @@ Scope:
 
 Dependencies:
 
+- B-008
 - B-603
 
 Acceptance:
@@ -948,6 +1107,32 @@ Acceptance:
 - Users can trigger a repository context refresh on demand.
 - The latest context freshness state is visible after refresh completes.
 
+### B-608 Surface repository citations in refinement and ticket review
+
+Value:
+
+- Makes repository-grounded output reviewable and trustworthy instead of asking users to accept hidden context influence.
+
+Scope:
+
+- Show lightweight source citations when repository context contributes to summary output.
+- Show lightweight source citations when repository context contributes to generated ticket candidates.
+- Keep citation display readable in the requirement and ticket review experiences.
+
+Dependencies:
+
+- B-207
+- B-403
+- B-605
+- B-606
+
+Acceptance:
+
+- Repository-derived summary output exposes lightweight source citation in the requirement experience.
+- Repository-derived ticket candidate output exposes lightweight source citation in the review experience.
+- Citation display remains linked to the correct repository snapshot or source entry.
+- A developer can verify the feature by using ingested repository context and confirming the affected summary or ticket output shows the expected source reference.
+
 ## Epic 7: Hardening And Alpha Readiness
 
 Aligned roadmap milestone: Milestone 7
@@ -965,6 +1150,7 @@ Scope:
 
 Dependencies:
 
+- B-008
 - B-506
 - B-604
 
@@ -986,6 +1172,7 @@ Scope:
 
 Dependencies:
 
+- B-007
 - B-002
 
 Acceptance:
@@ -1103,6 +1290,60 @@ Acceptance:
 - Representative refinement turns are measured under MVP-like conditions.
 - Typical refinement turns complete within the documented 10-second target under those conditions.
 - Slower operations surface an explicit in-progress state to the user.
+
+### B-708 Implement integration credential protection and secret redaction
+
+Value:
+
+- Brings auth and integration handling up to the documented MVP security bar instead of relying on convention.
+
+Scope:
+
+- Encrypt or otherwise protect stored integration credentials and sensitive connection details.
+- Apply log and error-response redaction rules for secrets and sensitive provider data.
+- Verify that UI and API responses do not expose stored credentials during normal product flows.
+
+Dependencies:
+
+- B-007
+- B-004
+- B-201
+- B-501
+- B-601
+- B-702
+
+Acceptance:
+
+- Stored integration credentials are protected according to the documented MVP security approach.
+- Ordinary logs and error responses do not expose raw secrets or sensitive connection values.
+- Representative UI and API flows do not return stored credential values to authorized or unauthorized users.
+- The repository documents how secret protection and redaction are verified during implementation, including which checks to run and what evidence to look for.
+
+### B-709 Build basic admin and diagnostics surfaces
+
+Value:
+
+- Gives the team a minimal operational view into jobs, integrations, and failure states needed to support alpha users.
+
+Scope:
+
+- Expose a basic diagnostics surface for key background jobs, integration status, and recent failures.
+- Show enough state to inspect repository sync freshness, export outcomes, and retry or terminal failure conditions.
+- Keep the surface limited to MVP operational support needs rather than building a full admin platform.
+
+Dependencies:
+
+- B-701
+- B-702
+- B-705
+- B-706
+
+Acceptance:
+
+- The product exposes a basic diagnostics path for inspecting recent job and integration outcomes.
+- A reviewer can inspect repository sync freshness, export status, and recent failure state without relying only on raw logs.
+- The diagnostics surface is sufficient to support the documented alpha-readiness milestone without requiring a separate observability platform.
+- A developer or reviewer can use the diagnostics surface to confirm the last known status of a job or integration without reading raw database records.
 
 ## Backlog Notes
 

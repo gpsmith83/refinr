@@ -35,6 +35,21 @@ These are not full test scripts, but they should be specific enough that a perso
 
 ## Milestone 0
 
+### B-000 Repository bootstrap and developer workflow
+
+- Milestone: `milestone:foundation`
+- Area: `area:infra`
+- Type: `type:feature`
+- Depends on: none
+- Summary: Define the repository bootstrap path, required toolchain, standard scripts, environment templates, and local verification steps so a new developer can start implementation without tribal knowledge.
+- Summary: Define the repository bootstrap path, required toolchain, standard scripts, environment templates, and exact local verification steps so a new developer can start implementation without tribal knowledge.
+- Acceptance:
+  - The repository contains a documented developer bootstrap path that assumes no prior project knowledge.
+  - The required Node.js version and package manager are explicitly stated and enforced or validated by the repository tooling.
+  - Standard scripts exist for development, build, lint, test, migration, and seed or equivalent local data setup workflows.
+  - Environment variable templates exist for local development and list the required values for frontend, API, database, session, and integration-related configuration.
+  - A developer starting from a fresh clone can follow the documented bootstrap flow and verify that the repository is ready for Milestone 0 implementation work.
+
 ### B-001 Angular application shell
 
 - Milestone: `milestone:foundation`
@@ -76,7 +91,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:foundation`
 - Area: `area:auth`
 - Type: `type:feature`
-- Depends on: `B-002`, `B-003`
+- Depends on: `B-007`, `B-002`, `B-003`
 - Summary: Configure Passport-based GitHub OAuth and session persistence for authenticated users.
 - Acceptance:
   - A new or existing user can complete sign-in with GitHub OAuth.
@@ -101,11 +116,38 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:foundation`
 - Area: `area:infra`
 - Type: `type:feature`
-- Depends on: `B-001`, `B-002`, `B-003`
-- Summary: Create a local Docker Compose stack for frontend, API, and database with documented startup steps.
+- Depends on: `B-000`, `B-001`, `B-002`, `B-003`, `B-008`
+- Summary: Create a local Docker Compose stack for frontend, API, database, and worker with startup steps aligned to the documented bootstrap, environment, migration, and worker workflow.
 - Acceptance:
-  - Frontend, API, and database services can be started locally from one documented workflow.
-  - The documented startup path is sufficient for another developer to reach a running local stack.
+  - Frontend, API, database, and worker services can be started locally from one documented workflow.
+  - The documented startup path is sufficient for another developer with no prior repository knowledge to reach a running local stack.
+  - The documented path includes the expected pre-requisites, required environment files, migration steps, and the worker service needed before the application can be used locally.
+
+### B-007 Local secrets and external access prerequisites
+
+- Milestone: `milestone:foundation`
+- Area: `area:infra`
+- Type: `type:feature`
+- Depends on: `B-000`
+- Summary: Document the required local secrets, non-production credentials, sandbox destinations, where each secret is used, and how a developer confirms setup is complete.
+- Acceptance:
+  - The repository documentation explicitly lists the local secrets and external accounts required for GitHub OAuth, session configuration, Linear integration, and AI provider access.
+  - The setup guidance states how a developer obtains approved non-production credentials or sandbox destinations for each external dependency.
+  - Local environment templates include the required secret variable names without embedding live credential values.
+  - A developer can verify whether their local machine is ready to begin auth and integration implementation without relying on tribal knowledge or production credentials.
+
+### B-008 Worker runtime and job execution skeleton
+
+- Milestone: `milestone:foundation`
+- Area: `area:jobs`
+- Type: `type:feature`
+- Depends on: `B-000`, `B-002`, `B-003`
+- Summary: Create the worker runtime, pg-boss connection setup, local startup command, and baseline job registration conventions for queue-backed work.
+- Acceptance:
+  - The repository contains a worker runtime entry point aligned with the documented architecture and stack.
+  - The worker can start locally against the configured PostgreSQL instance and connect to pg-boss successfully.
+  - Baseline job registration conventions are documented so later tickets can add background jobs consistently.
+  - A developer can run the documented worker start command and verify from a simple check or expected log output that it is ready to process jobs.
 
 ## Milestone 1
 
@@ -176,7 +218,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:guided-refinement`
 - Area: `area:ai`
 - Type: `type:feature`
-- Depends on: `B-002`
+- Depends on: `B-007`, `B-002`
 - Summary: Create an internal AI provider abstraction with the first commercial provider adapter and usage metadata capture.
 - Acceptance:
   - The backend calls the configured AI provider through an internal provider abstraction rather than vendor-specific logic in domain code.
@@ -243,6 +285,20 @@ These are not full test scripts, but they should be specific enough that a perso
   - The total readiness score is visible to the user.
   - The UI highlights missing information that is preventing ticket generation.
 
+### B-207 Live requirement summary panel
+
+- Milestone: `milestone:guided-refinement`
+- Area: `area:frontend`
+- Type: `type:feature`
+- Depends on: `B-104`, `B-204`
+- Summary: Render the synthesized requirement summary in the requirement detail view and keep it current across refinement turns and reloads.
+- Summary: Render the synthesized requirement summary in the requirement detail view and make it easy to verify that it updates and reloads correctly.
+- Acceptance:
+  - The requirement UI shows what is currently known about the requirement based on the latest summary snapshot.
+  - The summary panel presents the latest synthesized state after meaningful refinement responses.
+  - The latest summary remains visible after page refresh or later revisit.
+  - A developer can verify the panel by completing refinement turns, refreshing the page, and confirming the latest saved summary is still shown.
+
 ## Milestone 3
 
 ### B-301 Persona invocation model and audit trail
@@ -297,7 +353,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:persona-orchestration`
 - Area: `area:orchestration`
 - Type: `type:feature`
-- Depends on: `B-205`, `B-304`
+- Depends on: `B-205`
 - Summary: Enforce blocking readiness dimensions before ticket generation.
 - Acceptance:
   - Ticket generation is blocked when blocking readiness dimensions are insufficient.
@@ -314,6 +370,21 @@ These are not full test scripts, but they should be specific enough that a perso
   - The user can explicitly override the readiness gate from the product flow.
   - The override action is persisted as part of refinement history.
   - Downstream ticket data is marked to reflect that the requirement was exported under override.
+
+### B-307 Readiness gate status and override UI
+
+- Milestone: `milestone:persona-orchestration`
+- Area: `area:frontend`
+- Type: `type:feature`
+- Depends on: `B-206`, `B-305`, `B-306`
+- Summary: Show readiness gate blocking reasons in the requirement UI and provide the explicit override action with visible override state.
+- Summary: Show readiness gate blocking reasons in the requirement UI and provide the explicit override action with visible override state from the same screen.
+- Acceptance:
+  - The UI explains why ticket generation is blocked when readiness requirements are not met.
+  - The UI identifies the dimensions that are preventing ticket generation.
+  - A user can explicitly override the readiness gate from the product UI.
+  - The requirement UI reflects when downstream tickets are being generated under override.
+  - A developer can verify the flow from the requirement screen without using the API directly.
 
 ## Milestone 4
 
@@ -377,6 +448,21 @@ These are not full test scripts, but they should be specific enough that a perso
   - Users can edit existing dependency or sequencing information.
   - Updated dependency information persists with the ticket set.
 
+### B-406 Ticket candidate content editing
+
+- Milestone: `milestone:ticketization`
+- Area: `area:tickets`
+- Type: `type:feature`
+- Depends on: `B-401`, `B-403`
+- Summary: Allow direct editing of ticket candidate content, including execution guidance and unresolved-question blocking state, before export.
+- Summary: Allow direct editing of ticket candidate content, including execution guidance and unresolved-question blocking state, before export.
+- Acceptance:
+  - A user can edit ticket candidate content before export.
+  - Edited ticket content persists across reload or later revisit.
+  - A user can mark a ticket candidate as blocked by unresolved questions when needed.
+  - Edited candidates remain linked to the originating requirement and candidate set.
+  - A developer can verify the edit flow by changing a ticket, reloading the review view, and confirming the saved changes remain visible.
+
 ## Milestone 5
 
 ### B-501 Linear connection domain and validation
@@ -384,7 +470,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:linear-export`
 - Area: `area:integrations`
 - Type: `type:feature`
-- Depends on: `B-005`
+- Depends on: `B-007`, `B-005`
 - Summary: Configure and persist one Linear destination per project and validate connection details and target workflow.
 - Acceptance:
   - A project can store one Linear destination for MVP use.
@@ -456,7 +542,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:repository-context`
 - Area: `area:integrations`
 - Type: `type:feature`
-- Depends on: `B-004`, `B-005`
+- Depends on: `B-007`, `B-004`, `B-005`
 - Summary: Add GitHub repository connection persistence and project-scoped repository metadata.
 - Acceptance:
   - A project can store a GitHub repository connection.
@@ -490,7 +576,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:repository-context`
 - Area: `area:repository-context`
 - Type: `type:feature`
-- Depends on: `B-603`
+- Depends on: `B-008`, `B-603`
 - Summary: Fetch approved context sources, parse documents, and create repository context snapshots.
 - Acceptance:
   - Approved context sources are fetched and parsed through the ingestion pipeline.
@@ -532,6 +618,20 @@ These are not full test scripts, but they should be specific enough that a perso
   - Users can trigger a repository context refresh on demand.
   - The latest context freshness state is visible after refresh completes.
 
+### B-608 Repository citation display in refinement and review
+
+- Milestone: `milestone:repository-context`
+- Area: `area:frontend`
+- Type: `type:feature`
+- Depends on: `B-207`, `B-403`, `B-605`, `B-606`
+- Summary: Surface lightweight repository source citations in refinement summaries and ticket review when project context contributes to the output.
+- Summary: Surface lightweight repository source citations in refinement summaries and ticket review when project context contributes to the output so users can see where the information came from.
+- Acceptance:
+  - Repository-derived summary output exposes lightweight source citation in the requirement experience.
+  - Repository-derived ticket candidate output exposes lightweight source citation in the review experience.
+  - Citation display remains linked to the correct repository snapshot or source entry.
+  - A developer can verify the feature by using ingested repository context and confirming the affected summary or ticket output shows the expected source reference.
+
 ## Milestone 7
 
 ### B-701 Worker retries and recovery rules
@@ -539,7 +639,7 @@ These are not full test scripts, but they should be specific enough that a perso
 - Milestone: `milestone:hardening`
 - Area: `area:jobs`
 - Type: `type:feature`
-- Depends on: `B-506`, `B-604`
+- Depends on: `B-008`, `B-506`, `B-604`
 - Summary: Configure retries and recovery behavior for ingestion and export jobs.
 - Acceptance:
   - Retryable ingestion and export job failures recover automatically where appropriate.
@@ -614,3 +714,31 @@ These are not full test scripts, but they should be specific enough that a perso
   - Representative refinement turns are measured under MVP-like conditions.
   - Typical refinement turns complete within the documented 10-second target under those conditions.
   - Slower operations surface an explicit in-progress state to the user.
+
+### B-708 Integration credential protection and secret redaction
+
+- Milestone: `milestone:hardening`
+- Area: `area:security`
+- Type: `type:feature`
+- Depends on: `B-007`, `B-004`, `B-201`, `B-501`, `B-601`, `B-702`
+- Summary: Protect stored integration credentials and enforce redaction so secrets do not leak through logs, error responses, or normal product APIs.
+- Summary: Protect stored integration credentials and enforce redaction so secrets do not leak through logs, error responses, or normal product APIs.
+- Acceptance:
+  - Stored integration credentials are protected according to the documented MVP security approach.
+  - Ordinary logs and error responses do not expose raw secrets or sensitive connection values.
+  - Representative UI and API flows do not return stored credential values to authorized or unauthorized users.
+  - The repository documents how secret protection and redaction are verified during implementation, including which checks to run and what evidence to look for.
+
+### B-709 Basic admin and diagnostics surfaces
+
+- Milestone: `milestone:hardening`
+- Area: `area:operations`
+- Type: `type:feature`
+- Depends on: `B-701`, `B-702`, `B-705`, `B-706`
+- Summary: Build a minimal diagnostics surface for jobs, integrations, repository freshness, export outcomes, and recent failures needed for alpha support.
+- Summary: Build a minimal diagnostics surface for jobs, integrations, repository freshness, export outcomes, and recent failures needed for alpha support.
+- Acceptance:
+  - The product exposes a basic diagnostics path for inspecting recent job and integration outcomes.
+  - A reviewer can inspect repository sync freshness, export status, and recent failure state without relying only on raw logs.
+  - The diagnostics surface is sufficient to support the documented alpha-readiness milestone without requiring a separate observability platform.
+  - A developer or reviewer can use the diagnostics surface to confirm the last known status of a job or integration without reading raw database records.

@@ -29,7 +29,7 @@ Primary outputs:
 - PostgreSQL with pgvector enabled
 - Drizzle schema and migrations initialized
 - Passport session auth with GitHub OAuth
-- Docker Compose local environment
+- Docker Compose local environment for frontend, API, database, and worker
 - Basic workspace and project creation flow
 
 Exit criteria:
