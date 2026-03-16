@@ -86,6 +86,7 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 ### Acceptance Criteria
 
 - The system can introduce a new persona based on defined orchestration rules.
+- Persona control follows the hybrid model: the system recommends personas and the user can accept, skip, or manually request one where allowed.
 - The UI shows which persona is active.
 - The system explains why the new persona was introduced.
 - Persona invocations are stored in refinement history.
@@ -153,6 +154,7 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 ### Acceptance Criteria
 
 - A project can store a valid Linear connection.
+- Each project exports to one configured Linear team or workflow destination in MVP.
 - Approved ticket candidates can be exported to Linear.
 - Each export action is recorded as an export batch.
 - The system stores per-ticket export results.
@@ -210,12 +212,69 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 - The system stores readiness assessments over time.
 - The system stores export history and resulting Linear mappings.
 - Repository context snapshots are versioned rather than silently replaced.
+- Full AI provider request and response payload history is retained for MVP auditability.
 
 ### Minimum Verification
 
 - Generate a ticket candidate and inspect its origin linkage.
 - Review prior readiness and persona history for the requirement.
 - Export the ticket and confirm the downstream mapping is recorded.
+- Confirm that provider call history for the requirement can be retrieved for audit purposes.
+
+## Non-Functional Acceptance Gates
+
+### Responsiveness
+
+Acceptance criteria:
+
+- A normal refinement turn should typically produce the next visible system response within 10 seconds under expected MVP conditions.
+- The UI should expose an in-progress state when the system is waiting on longer-running operations.
+- Long-running work should not leave the user in an ambiguous state.
+
+Minimum verification:
+
+- Measure several normal refinement turns under representative conditions.
+- Confirm the typical visible response completes within 10 seconds.
+- Confirm loading and in-progress states appear when responses are slower.
+
+### Reliability
+
+Acceptance criteria:
+
+- The MVP must handle common external failures gracefully, but it does not require an explicit uptime target at this stage.
+- AI, repository, or Linear failures must not corrupt durable workflow state.
+- Retryable failures must be surfaced clearly to the user.
+
+Minimum verification:
+
+- Simulate representative AI, repository, and Linear failures.
+- Confirm state remains intact and retry paths are visible.
+
+### Security And Isolation
+
+Acceptance criteria:
+
+- Workspace data must remain isolated from other workspaces.
+- Integration credentials must not be exposed in UI responses or ordinary logs.
+- Session-based access control must be enforced on project and requirement resources.
+
+Minimum verification:
+
+- Attempt cross-workspace access with a different authenticated user.
+- Inspect representative logs and API responses for credential leakage.
+- Confirm unauthorized access is rejected for project-scoped resources.
+
+### Auditability
+
+Acceptance criteria:
+
+- The system must retain persona invocation history, readiness history, repository context snapshot history, export history, and full provider payload history for MVP.
+- Audit records must remain linked to the originating requirement and project.
+
+Minimum verification:
+
+- Inspect one requirement with completed refinement and export history.
+- Confirm all required audit records are present and linked.
 
 ## MVP Release Gate
 
@@ -226,6 +285,7 @@ The MVP should not be considered release-ready until all of the following are tr
 - Core failure handling is verified for AI, repository, and Linear integration paths.
 - Traceability from requirement to exported Linear issue is demonstrably intact.
 - Workspace isolation is verified.
+- Non-functional acceptance gates pass for responsiveness, reliability handling, security, and auditability.
 
 ## Out-Of-Scope For MVP Acceptance
 

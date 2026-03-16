@@ -121,6 +121,7 @@ Recommended notes:
 Responsibilities:
 
 - Track provider usage, latency, model choice, and outcome.
+- Retain full provider request and response payload history for MVP auditability.
 - Track worker job execution for key long-running flows.
 - Track important integration lifecycle events such as repository sync and export attempts.
 
@@ -229,6 +230,26 @@ Suggested fields:
 Purpose:
 
 - Store the scored readiness state used for gating ticket generation.
+
+### AIProviderCall
+
+Suggested fields:
+
+- id
+- requirement_id nullable
+- refinement_session_id nullable
+- provider_name
+- model_name
+- prompt_payload JSONB
+- response_payload JSONB
+- latency_ms
+- token_or_usage_metadata JSONB
+- outcome_status
+- created_at
+
+Purpose:
+
+- Preserve complete provider interaction history for auditability, debugging, and cost review.
 
 ### TicketCandidate
 

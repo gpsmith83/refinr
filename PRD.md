@@ -195,6 +195,8 @@ To keep the workflow understandable in MVP, Refinr should apply these limits:
 
 Users should be able to influence orchestration without having to manage it manually.
 
+For MVP, persona control is explicitly hybrid: the system recommends the next persona, and the user may accept, skip, or manually request one where allowed.
+
 MVP controls should include:
 
 - Accept the suggested next persona.
@@ -811,7 +813,7 @@ MVP rules:
 ### Linear Integration
 
 - Users can authenticate to Linear.
-- Users can map Refinr projects to Linear teams or boards.
+- Users can map each Refinr project to a single Linear team or workflow destination in MVP.
 - Approved tickets can be pushed to Linear as issues.
 - The system should record the Linear issue identifiers returned after creation.
 - Failed sync attempts should be visible and retryable.
@@ -1055,10 +1057,11 @@ A user is activated when they:
 - AI-generated tickets may look plausible while still missing critical implementation detail.
 - Linear integration may encourage premature ticket creation if readiness gates are weak.
 
-## Open Product Decisions
+## Resolved MVP Product Decisions
 
-- Should persona selection be mostly automatic, mostly user-driven, or hybrid?
-- Should the first release focus on a single team workflow inside Linear or support multiple teams per project?
+- Persona selection will be hybrid: the system recommends personas and the user can accept, skip, or manually request them within the orchestration rules.
+- Each Refinr project will target a single Linear team or workflow destination in the first release.
+- MVP non-functional requirements must be documented as explicit acceptance gates rather than remaining purely directional.
 
 ## Recommended MVP Positioning
 
