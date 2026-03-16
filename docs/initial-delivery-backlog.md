@@ -133,6 +133,10 @@ Acceptance:
 - An authenticated user can create a workspace and a project.
 - The project appears on the project dashboard.
 
+Split guidance:
+
+- If this work expands during planning, split into separate tickets for workspace domain APIs, project domain APIs, and combined creation UI.
+
 ### B-006 Create Docker Compose local stack
 
 Value:
@@ -306,6 +310,10 @@ Acceptance:
 - A user can start refinement from a requirement page.
 - The system produces the first guided question.
 
+Split guidance:
+
+- If API and UI work diverge materially, split into a backend session-start ticket and a frontend refinement-start action ticket.
+
 ### B-203 Implement question-and-answer loop persistence
 
 Value:
@@ -346,7 +354,7 @@ Acceptance:
 
 - Summary state updates after meaningful user responses.
 
-### B-205 Compute and display basic readiness state
+### B-205 Compute basic readiness state
 
 Value:
 
@@ -355,7 +363,6 @@ Value:
 Scope:
 
 - Compute initial readiness dimension state.
-- Render readiness score and missing information in the UI.
 
 Dependencies:
 
@@ -363,7 +370,26 @@ Dependencies:
 
 Acceptance:
 
+- The backend can derive readiness dimensions and total score for a requirement.
+
+### B-206 Render readiness score and missing information in the UI
+
+Value:
+
+- Makes refinement progress legible to the user.
+
+Scope:
+
+- Render readiness dimensions, total score, and missing information in the requirement UI.
+
+Dependencies:
+
+- B-205
+
+Acceptance:
+
 - Readiness dimensions are visible as complete, partial, or missing.
+- The UI highlights missing information preventing ticket generation.
 
 ## Epic 3: Persona Orchestration And Readiness Gate
 
@@ -447,7 +473,11 @@ Acceptance:
 
 - The user can accept or skip a suggested persona and see why it was suggested.
 
-### B-305 Enforce readiness gate and override flow
+Split guidance:
+
+- If the UI action set grows, separate manual persona request into its own ticket.
+
+### B-305 Enforce readiness gate
 
 Value:
 
@@ -456,7 +486,6 @@ Value:
 Scope:
 
 - Enforce blocking readiness dimensions.
-- Add override capture and downstream override marking.
 
 Dependencies:
 
@@ -465,7 +494,27 @@ Dependencies:
 
 Acceptance:
 
-- Ticket generation is blocked when readiness is insufficient unless the user overrides it.
+- Ticket generation is blocked when readiness is insufficient.
+
+### B-306 Implement readiness override capture and marking
+
+Value:
+
+- Preserves user control while keeping override behavior explicit and auditable.
+
+Scope:
+
+- Add override action capture.
+- Mark downstream ticket state when generated under override.
+
+Dependencies:
+
+- B-305
+
+Acceptance:
+
+- A user can explicitly override the readiness gate.
+- Override state is captured and reflected in downstream ticket data.
 
 ## Epic 4: Ticketization And Review
 
@@ -532,6 +581,10 @@ Acceptance:
 
 - Users can inspect and approve individual ticket candidates.
 
+Split guidance:
+
+- If review scope expands, separate candidate list view from candidate detail editing.
+
 ### B-404 Implement split and merge ticket actions
 
 Value:
@@ -575,7 +628,7 @@ Acceptance:
 
 Aligned roadmap milestone: Milestone 5
 
-### B-501 Implement Linear connection setup
+### B-501 Implement Linear connection domain and validation
 
 Value:
 
@@ -594,7 +647,25 @@ Acceptance:
 
 - A project can store and validate a Linear connection.
 
-### B-502 Implement export batch model and APIs
+### B-502 Build Linear connection UI
+
+Value:
+
+- Gives users a usable path to configure export destinations.
+
+Scope:
+
+- Add project UI for connecting and validating a Linear destination.
+
+Dependencies:
+
+- B-501
+
+Acceptance:
+
+- A project user can configure and save one Linear destination through the UI.
+
+### B-503 Implement export batch model and APIs
 
 Value:
 
@@ -614,7 +685,7 @@ Acceptance:
 
 - Export actions are recorded as batches with per-ticket status.
 
-### B-503 Implement Linear issue creation adapter
+### B-504 Implement Linear issue creation adapter
 
 Value:
 
@@ -627,13 +698,13 @@ Scope:
 
 Dependencies:
 
-- B-502
+- B-503
 
 Acceptance:
 
 - Approved ticket candidates can be exported to Linear and mapped back to created issues.
 
-### B-504 Surface export results in the UI
+### B-505 Surface export results in the UI
 
 Value:
 
@@ -646,13 +717,13 @@ Scope:
 
 Dependencies:
 
-- B-503
+- B-504
 
 Acceptance:
 
 - Users can see export results for each ticket candidate.
 
-### B-505 Implement retryable partial export handling
+### B-506 Implement retryable partial export handling
 
 Value:
 
@@ -665,8 +736,8 @@ Scope:
 
 Dependencies:
 
-- B-502
 - B-503
+- B-504
 
 Acceptance:
 
@@ -676,7 +747,7 @@ Acceptance:
 
 Aligned roadmap milestone: Milestone 6
 
-### B-601 Implement GitHub repository connection
+### B-601 Implement GitHub repository connection domain
 
 Value:
 
@@ -696,7 +767,25 @@ Acceptance:
 
 - A project can connect a GitHub repository.
 
-### B-602 Build context source recommendation and selection flow
+### B-602 Build GitHub repository connection UI
+
+Value:
+
+- Gives users a path to connect repository context to a project.
+
+Scope:
+
+- Add project UI for connecting a GitHub repository.
+
+Dependencies:
+
+- B-601
+
+Acceptance:
+
+- A project user can configure a GitHub repository connection through the UI.
+
+### B-603 Build context source recommendation and selection flow
 
 Value:
 
@@ -710,12 +799,13 @@ Scope:
 Dependencies:
 
 - B-601
+- B-602
 
 Acceptance:
 
 - A user can choose which repository context sources are included.
 
-### B-603 Implement repository context ingestion job pipeline
+### B-604 Implement repository context ingestion job pipeline
 
 Value:
 
@@ -728,13 +818,13 @@ Scope:
 
 Dependencies:
 
-- B-602
+- B-603
 
 Acceptance:
 
 - The system can ingest approved context sources into a stored snapshot.
 
-### B-604 Persist citations and context freshness metadata
+### B-605 Persist citations and context freshness metadata
 
 Value:
 
@@ -747,13 +837,13 @@ Scope:
 
 Dependencies:
 
-- B-603
+- B-604
 
 Acceptance:
 
 - Context snapshots retain source citations and freshness metadata.
 
-### B-605 Apply repository context in summaries and ticket generation
+### B-606 Apply repository context in summaries and ticket generation
 
 Value:
 
@@ -768,13 +858,13 @@ Dependencies:
 
 - B-204
 - B-402
-- B-604
+- B-605
 
 Acceptance:
 
 - Refinement outputs can reference repository context while preserving direct user intent.
 
-### B-606 Add on-demand repository context refresh
+### B-607 Add on-demand repository context refresh
 
 Value:
 
@@ -787,7 +877,7 @@ Scope:
 
 Dependencies:
 
-- B-603
+- B-604
 
 Acceptance:
 
@@ -810,8 +900,8 @@ Scope:
 
 Dependencies:
 
-- B-505
-- B-603
+- B-506
+- B-604
 
 Acceptance:
 
@@ -870,8 +960,8 @@ Scope:
 Dependencies:
 
 - B-202
-- B-503
-- B-603
+- B-504
+- B-604
 
 Acceptance:
 
@@ -890,8 +980,8 @@ Scope:
 Dependencies:
 
 - B-301
-- B-502
-- B-604
+- B-503
+- B-605
 
 Acceptance:
 
@@ -944,3 +1034,25 @@ Acceptance:
 - This backlog is intentionally initial, not exhaustive.
 - Tickets should be refined further before implementation if hidden scope or cross-cutting security concerns emerge.
 - Tickets that grow beyond normal implementation size should be split further rather than carried forward as oversized stories.
+
+## What Mapping This Into Linear Would Mean
+
+Turning this document into a Linear-ready import format would mean converting each backlog item into a tracker-native record with explicit tracker fields, not just leaving it as a documentation list.
+
+In practice, that would require:
+
+- Choosing which sections become Linear projects, epics, or plain issues.
+- Turning each backlog ticket into a title plus structured description.
+- Adding labels such as milestone, area, and type.
+- Encoding dependencies in a form that Linear can represent.
+- Deciding import order so prerequisite issues exist before dependent issues are linked.
+- Normalizing ticket wording so descriptions are concise enough for a tracker but still preserve acceptance outcomes.
+
+For this backlog specifically, the most sensible mapping would likely be:
+
+- Each epic in this document becomes a Linear project, epic, or labeled grouping.
+- Each `B-xxx` item becomes one Linear issue.
+- Dependencies are carried over where the tracker supports them.
+- Acceptance sections are included in each issue description.
+
+That work is mostly formatting and tracker-shaping, not new product definition.
