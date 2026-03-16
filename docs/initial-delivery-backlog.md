@@ -20,10 +20,35 @@ The backlog is structured to follow INVEST principles as closely as possible:
 - Dependencies are listed only where they materially affect sequencing.
 - Acceptance criteria here are written as observable outcomes that should remain usable when copied directly into a tracker.
 - Ticket IDs are provisional and intended for documentation use until moved into a tracking system.
+- This backlog preserves the richer MVP scope already defined in the PRD; where the PRD and backlog diverge, the backlog should be expanded rather than silently narrowing product behavior.
+
+## Execution Readiness Standard
+
+Before a backlog item is considered startable by an implementation team, the tracker version of that item should explicitly include:
+
+- Prerequisites and blocking tickets that must be complete first.
+- Local services that must be running.
+- Required environment variables or local configuration.
+- Required external sandbox credentials, accounts, or test destinations.
+- The exact startup path the developer should use in this repository.
+- The validation command or walkthrough that proves the change works locally.
+- The expected ready signal that tells a junior developer their environment is correctly prepared.
+
+Until B-000 and B-006 establish the repository-standard commands, milestone readiness notes below should be treated as the minimum execution context that must be copied into tracker issues.
 
 ## Epic 0: Foundation
 
 Aligned roadmap milestone: Milestone 0
+
+Shared execution readiness for this epic:
+
+- Prerequisites: none for B-000 and B-007; all other foundation work should wait for the bootstrap and secrets guidance they produce.
+- Local services: frontend, API, PostgreSQL, and worker are introduced during this epic and must converge on one documented local startup path.
+- Environment and config: local environment templates, database connection settings, session configuration, and GitHub OAuth variables defined by B-000 and B-007.
+- External access: a non-production GitHub OAuth app and a test GitHub account are required for B-004.
+- Startup path: use the repository bootstrap and Docker Compose commands established by B-000 and B-006.
+- Validation path: verify placeholder routes, API health, database migrations, worker readiness, and GitHub sign-in once those pieces exist.
+- Ready signal: the app shell loads, the API health endpoint responds successfully, migrations complete, the worker connects to pg-boss, and GitHub login succeeds.
 
 ### B-000 Establish repository bootstrap and developer workflow
 
@@ -152,6 +177,7 @@ Scope:
 - Create workspace and project domain APIs.
 - Build the UI flow for workspace and project creation.
 - Persist workspace membership and project ownership.
+- Support project metadata needed for refinement and export, including product area, goals, default labels, and an optional default persona stack.
 
 Dependencies:
 
@@ -164,7 +190,9 @@ Acceptance:
 - An authenticated user can create a new workspace from the product UI.
 - The same user can create a project within that workspace.
 - The created project appears on the project dashboard for that workspace.
+- Project metadata and default refinement settings can be captured and persisted during setup or immediate project editing.
 - Workspace and project ownership are persisted correctly.
+- Saved project metadata remains available after reload or later revisit.
 
 Split guidance:
 
@@ -249,6 +277,16 @@ Acceptance:
 ## Epic 1: Requirement Intake And Persistence
 
 Aligned roadmap milestone: Milestone 1
+
+Shared execution readiness for this epic:
+
+- Prerequisites: B-000 and B-006 should be complete, and B-005 should provide an authenticated workspace and project to work against.
+- Local services: frontend, API, and PostgreSQL should be running through the standard local stack.
+- Environment and config: foundation environment templates plus any seeded or manually created workspace and project records needed for testing.
+- External access: GitHub sign-in remains required for authenticated UI flows.
+- Startup path: start the local stack with the repository-standard commands from B-000 and B-006, then create or load a test workspace and project.
+- Validation path: exercise requirement create, list, read, and reload flows through the UI and any supporting API endpoints.
+- Ready signal: an authenticated user can create a requirement, see it on the project dashboard, and reopen it after refresh.
 
 ### B-101 Implement requirement domain model and APIs
 
@@ -363,6 +401,16 @@ Acceptance:
 ## Epic 2: Guided Refinement Loop
 
 Aligned roadmap milestone: Milestone 2
+
+Shared execution readiness for this epic:
+
+- Prerequisites: milestone 1 flows must be working, and B-007 must have documented the AI provider credentials required for local development.
+- Local services: frontend, API, and PostgreSQL should be running; worker support is only required if a refinement step is moved behind a job boundary.
+- Environment and config: baseline app configuration plus AI provider keys, model selection, and any prompt-class configuration defined by the provider gateway.
+- External access: a non-production account for the primary AI provider is required.
+- Startup path: run the local stack, sign in, create or load a requirement, and use the requirement detail view as the starting point.
+- Validation path: start a refinement session, answer at least two turns, and confirm that messages, summaries, and readiness state persist after reload.
+- Ready signal: the first guided question returns successfully, follow-up turns persist, and the latest summary and readiness state reload correctly.
 
 ### B-201 Implement AI provider gateway abstraction
 
@@ -526,6 +574,16 @@ Acceptance:
 
 Aligned roadmap milestone: Milestone 3
 
+Shared execution readiness for this epic:
+
+- Prerequisites: milestone 2 must be functioning with persisted refinement history and readiness state.
+- Local services: frontend, API, and PostgreSQL should be running.
+- Environment and config: the same AI provider and application configuration used for milestone 2.
+- External access: the primary AI provider sandbox account remains required.
+- Startup path: run the local stack, open a non-trivial requirement, and continue from the requirement detail flow.
+- Validation path: verify persona recommendation, accept and skip flows, explicit invocation reasons, readiness gate behavior, and override history.
+- Ready signal: specialist personas appear for documented reasons and ticket generation is blocked or overridden deterministically from the requirement screen.
+
 ### B-301 Implement persona invocation model and audit trail
 
 Value:
@@ -685,6 +743,16 @@ Acceptance:
 
 Aligned roadmap milestone: Milestone 4
 
+Shared execution readiness for this epic:
+
+- Prerequisites: milestone 3 must be working, and a ticket-ready requirement should be available for review.
+- Local services: frontend, API, and PostgreSQL should be running.
+- Environment and config: the same refinement configuration used in milestone 3, plus any ticket-generation settings.
+- External access: the primary AI provider account is still required when ticket candidates are generated live.
+- Startup path: open a ticket-ready requirement from the local stack and enter the ticket review flow.
+- Validation path: generate candidates, inspect them, edit content, split, merge, discard, update dependencies, and confirm the saved state after reload.
+- Ready signal: the approved candidate set reflects user edits accurately and discarded candidates stay out of the default export path.
+
 ### B-401 Implement ticket candidate domain model and APIs
 
 Value:
@@ -824,9 +892,42 @@ Acceptance:
 - Edited candidates remain linked to the originating requirement and candidate set.
 - A developer can verify the edit flow by changing a ticket, reloading the review view, and confirming the saved changes remain visible.
 
+### B-407 Implement ticket candidate discard and restore actions
+
+Value:
+
+- Lets users remove low-value ticket candidates from the export set without losing traceability.
+
+Scope:
+
+- Allow users to discard a ticket candidate from the active review set.
+- Preserve discarded candidates as traceable, non-exportable records unless they are restored.
+- Support restoring a discarded ticket candidate when the user decides it should be reconsidered.
+
+Dependencies:
+
+- B-403
+- B-406
+
+Acceptance:
+
+- A user can discard a ticket candidate from the review flow.
+- Discarded candidates are excluded from the default export selection.
+- Discarded candidates remain linked to the originating requirement and can be restored for review.
+
 ## Epic 5: Linear Export
 
 Aligned roadmap milestone: Milestone 5
+
+Shared execution readiness for this epic:
+
+- Prerequisites: milestone 4 must be working, and B-007 must have documented Linear test credentials and allowed destinations.
+- Local services: frontend, API, and PostgreSQL should be running; worker support is required when export retries run asynchronously.
+- Environment and config: Linear API credentials, destination mapping configuration, and any default export metadata such as labels or priority.
+- External access: a Linear test workspace, team, and any optional board or project destination needed for validation.
+- Startup path: start the local stack, configure the Linear destination from project settings, and open a reviewed requirement with approved ticket candidates.
+- Validation path: verify connection validation, export confirmation, downstream issue creation, metadata application, and safe retry of partial failures.
+- Ready signal: issues are created once in the expected Linear destination, expected metadata is applied, and successful mappings survive retries.
 
 ### B-501 Implement Linear connection domain and validation
 
@@ -837,7 +938,7 @@ Value:
 Scope:
 
 - Configure and persist one Linear destination per project.
-- Validate connection credentials and target team or workflow.
+- Validate connection credentials and target workspace, team, and optional board or project mapping.
 
 Dependencies:
 
@@ -846,9 +947,9 @@ Dependencies:
 
 Acceptance:
 
-- A project can store one Linear destination for MVP use.
-- The stored Linear connection is validated against the configured credentials and target workflow.
-- Invalid connection details are rejected rather than silently stored.
+- A project can store one Linear destination for MVP use, including the selected workspace, team, and any supported board or project mapping.
+- The stored Linear connection is validated against the configured credentials and selected destination objects.
+- Invalid connection details or invalid destination mappings are rejected rather than silently stored.
 
 ### B-502 Build Linear connection UI
 
@@ -858,7 +959,7 @@ Value:
 
 Scope:
 
-- Add project UI for connecting and validating a Linear destination.
+- Add project UI for connecting, validating, and saving a Linear destination selection.
 
 Dependencies:
 
@@ -867,6 +968,7 @@ Dependencies:
 Acceptance:
 
 - A project user can enter and save one Linear destination through the UI.
+- The UI allows the user to select the supported workspace, team, and any supported board or project mapping for that destination.
 - The UI surfaces connection validation success or failure.
 
 ### B-503 Implement export batch model and APIs
@@ -954,9 +1056,43 @@ Acceptance:
 - Failed export items can be retried without duplicating already successful issues.
 - Successful mappings remain intact across retries.
 
+### B-507 Implement export confirmation and metadata mapping
+
+Value:
+
+- Makes export intent explicit and ensures created Linear issues carry the execution metadata described in the PRD.
+
+Scope:
+
+- Add a pre-export confirmation step showing destination, issue count, and metadata to be applied.
+- Map supported project defaults and export metadata such as labels, priority, estimates, and project or board mapping onto created Linear issues.
+- Keep assignee unset by default unless the user explicitly chooses otherwise.
+
+Dependencies:
+
+- B-502
+- B-504
+- B-505
+
+Acceptance:
+
+- Before export, the UI confirms the destination and the metadata that will be applied to the selected ticket candidates.
+- Supported metadata such as labels, priority, estimates, and destination mapping are applied to created Linear issues consistently.
+- Exported issues remain traceable to their originating ticket candidates together with the metadata used at export time.
+
 ## Epic 6: Repository Context Ingestion
 
 Aligned roadmap milestone: Milestone 6
+
+Shared execution readiness for this epic:
+
+- Prerequisites: milestone 5 must be operational, and GitHub repository access must be available for a test repository that contains approved documents.
+- Local services: frontend, API, PostgreSQL, and worker should all be running.
+- Environment and config: GitHub integration configuration, repository context settings, and any storage location used for snapshots or cached artifacts.
+- External access: a test repository with readable markdown or documentation sources and credentials with permission to fetch its contents.
+- Startup path: start the full local stack, connect a repository, select approved sources, run ingestion, then revisit refinement or ticket generation.
+- Validation path: verify snapshot creation, citations, freshness, source replacement or removal, conflict surfacing, and on-demand refresh.
+- Ready signal: the latest repository snapshot is visible, citations resolve correctly, and removed sources stop influencing newly generated output after refresh.
 
 ### B-601 Implement GitHub repository connection domain
 
@@ -1133,9 +1269,45 @@ Acceptance:
 - Citation display remains linked to the correct repository snapshot or source entry.
 - A developer can verify the feature by using ingested repository context and confirming the affected summary or ticket output shows the expected source reference.
 
+### B-609 Implement repository context remediation and conflict handling
+
+Value:
+
+- Keeps repository grounding trustworthy when selected context later proves misleading, stale, or in conflict with direct user input.
+
+Scope:
+
+- Allow users to remove or replace previously approved context sources after the initial ingestion flow.
+- Surface conflicts between repository context and direct user input in the refinement experience.
+- Ensure refreshed snapshots and downstream outputs stop relying on removed sources.
+
+Dependencies:
+
+- B-603
+- B-604
+- B-606
+- B-607
+- B-608
+
+Acceptance:
+
+- A user can remove or replace a misleading context source after the initial ingestion flow.
+- Conflicts between repository context and direct user input are surfaced explicitly rather than silently resolved.
+- After a source is removed and context is refreshed, new summaries and ticket outputs no longer cite or rely on the removed source unless it is re-approved.
+
 ## Epic 7: Hardening And Alpha Readiness
 
 Aligned roadmap milestone: Milestone 7
+
+Shared execution readiness for this epic:
+
+- Prerequisites: the core refinement, export, and repository context flows from milestones 0 through 6 must already be working.
+- Local services: the full local stack, including worker, must be running.
+- Environment and config: all prior milestone settings plus any encryption, redaction, logging, and diagnostics configuration needed for hardening work.
+- External access: GitHub, Linear, and AI provider test accounts are required to simulate failure and recovery paths realistically.
+- Startup path: start the full local stack and execute representative end-to-end product flows before simulating failures or validating diagnostics.
+- Validation path: exercise failure handling, audit retrieval, responsiveness measurement, secret redaction, and diagnostics inspection using the documented MVP flows.
+- Ready signal: recoverable failures preserve state, audit data is retrievable, responsiveness evidence is captured, and diagnostics reflect recent job and integration status.
 
 ### B-701 Implement worker retries and recovery rules
 
@@ -1350,6 +1522,7 @@ Acceptance:
 - This backlog is intentionally initial, not exhaustive.
 - Tickets should be refined further before implementation if hidden scope or cross-cutting security concerns emerge.
 - Tickets that grow beyond normal implementation size should be split further rather than carried forward as oversized stories.
+- This backlog intentionally keeps the richer PRD-defined scope for project setup, export metadata, context remediation, and discardable ticket candidates. If a narrower MVP is desired, that should be an explicit product decision in the PRD rather than an accidental backlog omission.
 
 ## What Mapping This Into Linear Would Mean
 

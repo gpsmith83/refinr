@@ -20,7 +20,8 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 - A new user can sign in with GitHub OAuth.
 - An authenticated user can create a workspace.
 - A workspace member can create a project within that workspace.
-- A project can store its name and basic metadata.
+- A project can store its name and setup metadata needed for refinement and export, including product area, goals, and default labels.
+- A project can store optional default refinement settings such as a default persona stack.
 - The user can reach the project dashboard after project creation.
 - Workspace and project data are isolated from other workspaces.
 - Workspace and project ownership are persisted so later access checks behave consistently.
@@ -29,8 +30,9 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 
 - Sign in as a new user.
 - Create a workspace.
-- Create a project.
+- Create a project with product metadata and at least one default label or default persona setting.
 - Confirm the project appears on the dashboard.
+- Confirm the saved project metadata and default settings remain available after reload or revisit.
 - Confirm the created project remains available after reload or revisit.
 - Confirm a different workspace user cannot access that project without membership.
 
@@ -152,6 +154,7 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 - A user can edit ticket candidate content before export.
 - A user can split a broad ticket into multiple candidates.
 - A user can merge tickets that were over-split.
+- A user can discard a ticket candidate that should not be exported while preserving its traceability to the source requirement.
 - A user can edit dependency or ordering information.
 - A user can approve all ticket candidates or a subset.
 - All edits remain linked to the originating requirement and candidate set.
@@ -162,6 +165,7 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 - Edit one ticket.
 - Split one ticket.
 - Merge two tickets.
+- Discard one ticket and confirm it is excluded from the default export set while remaining reviewable.
 - Approve a subset for export.
 - Reload the review view and confirm the edited ticket set remains intact.
 
@@ -170,19 +174,23 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 ### Acceptance Criteria
 
 - A project can store a valid Linear connection.
-- Each project exports to one configured Linear team or workflow destination in MVP.
+- Each project exports to one configured Linear workspace and team destination in MVP, with optional board or project mapping where the destination model requires it.
+- Before export, the UI confirms the destination and any labels, priority, estimate, or equivalent execution metadata that will be applied.
 - Approved ticket candidates can be exported to Linear.
 - Each export action is recorded as an export batch.
 - The system stores per-ticket export results.
 - Returned Linear issue identifiers are persisted.
+- Supported export metadata is applied consistently to created Linear issues.
 - Partial failure is visible and retryable.
 - Successful exported tickets remain mapped to their source candidates across retries.
 
 ### Minimum Verification
 
-- Connect a Linear destination.
+- Connect a Linear destination with any required team, board, or project mapping.
+- Configure at least one supported piece of export metadata such as a label or priority.
 - Export approved tickets.
 - Confirm Linear issues are created.
+- Confirm the exported issues contain the expected destination mapping and metadata.
 - Simulate or trigger a partial failure and confirm retry behavior is available.
 - Confirm successful issues are not duplicated when retrying only failed items.
 
@@ -193,8 +201,10 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 - A project can connect a GitHub repository.
 - The system can recommend likely context sources.
 - A user can choose which context sources to include.
+- A user can remove or replace misleading context sources after the initial setup.
 - The system creates a repository context snapshot from approved sources.
 - Refinement can reference repository context without overriding direct user input.
+- Conflicts between repository context and direct user input are surfaced explicitly rather than silently resolved.
 - Context-derived outputs retain lightweight source citation.
 - Repository context snapshots retain freshness or sync metadata that can be surfaced later.
 
@@ -203,7 +213,9 @@ The goal is to make the MVP testable in concrete terms rather than relying on ge
 - Connect a GitHub repository.
 - Select approved markdown or documentation files.
 - Run context ingestion.
+- Remove or replace one approved source and confirm the refreshed snapshot reflects the change.
 - Confirm a refinement session references ingested context and exposes the source citation.
+- Confirm a conflict between repository context and direct user input is surfaced explicitly.
 - Confirm the snapshot exposes freshness or sync metadata after ingestion completes.
 
 ## Workflow 11: Failure Handling
