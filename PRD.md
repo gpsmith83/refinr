@@ -5,7 +5,7 @@
 - Status: Draft v0.2
 - Date: 2026-03-16
 - Product: Refinr
-- Owner: TBD
+- Owner: Gareth Walkersmith
 
 ## Document Structure
 
