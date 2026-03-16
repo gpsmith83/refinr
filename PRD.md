@@ -17,6 +17,8 @@ Implementation-facing detail has been split into supporting documents:
 - [docs/architecture.md](docs/architecture.md)
 - [docs/mvp-stack.md](docs/mvp-stack.md)
 - [docs/data-model.md](docs/data-model.md)
+- [docs/implementation-roadmap.md](docs/implementation-roadmap.md)
+- [docs/acceptance-criteria.md](docs/acceptance-criteria.md)
 
 ## Executive Summary
 

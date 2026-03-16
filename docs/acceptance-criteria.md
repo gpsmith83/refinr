@@ -1,0 +1,239 @@
+# Refinr MVP Acceptance Criteria
+
+## Purpose
+
+This document defines the acceptance criteria for the core MVP workflows in Refinr. It is the quality gate for implementation and should be used alongside [../PRD.md](../PRD.md) and [implementation-roadmap.md](implementation-roadmap.md).
+
+The goal is to make the MVP testable in concrete terms rather than relying on general intent.
+
+## Acceptance Criteria Principles
+
+- Each workflow must be testable end to end.
+- Acceptance criteria should describe observable system behavior.
+- Criteria should focus on product outcomes, not internal implementation details.
+- Failure handling and traceability are first-class parts of acceptance.
+
+## Workflow 1: Workspace And Project Setup
+
+### Acceptance Criteria
+
+- A new user can sign in with GitHub OAuth.
+- An authenticated user can create a workspace.
+- A workspace member can create a project within that workspace.
+- A project can store its name and basic metadata.
+- The user can reach the project dashboard after project creation.
+- Workspace and project data are isolated from other workspaces.
+
+### Minimum Verification
+
+- Sign in as a new user.
+- Create a workspace.
+- Create a project.
+- Confirm the project appears on the dashboard.
+- Confirm a different workspace user cannot access that project without membership.
+
+## Workflow 2: Requirement Creation And Persistence
+
+### Acceptance Criteria
+
+- A project user can create a requirement from a short freeform prompt.
+- The requirement is persisted and visible after page refresh or later revisit.
+- The requirement page shows the initial prompt and current status.
+- A requirement is associated with the correct project and workspace.
+
+### Minimum Verification
+
+- Create a requirement such as "I want to track abandoned carts."
+- Reload the page and confirm the requirement still exists.
+- Reopen the project and confirm the requirement is listed.
+
+## Workflow 3: Guided Refinement Loop
+
+### Acceptance Criteria
+
+- The system can initiate a refinement session with a default persona.
+- The system asks a clarifying question based on the requirement input.
+- The user can answer in plain language.
+- The system persists both the question and the answer.
+- The system can continue the refinement loop with a follow-up question.
+- The UI shows the active persona and current conversation history.
+
+### Minimum Verification
+
+- Open a requirement.
+- Start refinement.
+- Answer at least two rounds of questions.
+- Refresh the page and confirm the conversation history remains intact.
+
+## Workflow 4: Summary And Readiness State
+
+### Acceptance Criteria
+
+- After each meaningful refinement answer, the system updates a requirement summary snapshot.
+- The UI shows what is currently known about the requirement.
+- The UI shows readiness dimensions as complete, partial, or missing.
+- The readiness score is derived and visible, not hidden.
+- The system can identify missing information preventing ticket generation.
+
+### Minimum Verification
+
+- Complete at least two refinement responses.
+- Confirm the summary and readiness state change after each response.
+- Confirm at least one missing dimension is called out explicitly when the requirement is not yet ready.
+
+## Workflow 5: Persona Orchestration
+
+### Acceptance Criteria
+
+- The system can introduce a new persona based on defined orchestration rules.
+- The UI shows which persona is active.
+- The system explains why the new persona was introduced.
+- Persona invocations are stored in refinement history.
+- For non-trivial requirements, at least one specialist challenge persona can be introduced before ticket generation.
+
+### Minimum Verification
+
+- Use a non-trivial requirement with technical or user-facing implications.
+- Confirm that a specialist persona such as Senior Developer or UI Designer is invoked.
+- Confirm that the invocation reason is visible.
+
+## Workflow 6: Readiness Gate And Override
+
+### Acceptance Criteria
+
+- The system blocks ticket generation when blocking readiness dimensions remain insufficient.
+- The UI explains why ticket generation is blocked.
+- A user can explicitly override the gate.
+- Override actions are persisted in refinement history.
+- Tickets generated under override are marked accordingly.
+
+### Minimum Verification
+
+- Attempt ticket generation before the requirement is ready.
+- Confirm the system blocks the action and explains why.
+- Apply an override and confirm the override is recorded and reflected in downstream ticket state.
+
+## Workflow 7: Ticket Candidate Generation
+
+### Acceptance Criteria
+
+- A ticket-ready requirement can be decomposed into one or more ticket candidates.
+- Each ticket candidate includes a title, description, and acceptance criteria.
+- Ticket candidates preserve traceability to the source requirement.
+- Ticket candidates can include dependencies or ordering hints.
+- The default output model is flat, sibling issue candidates rather than a deep hierarchy.
+
+### Minimum Verification
+
+- Refine a requirement to readiness.
+- Generate ticket candidates.
+- Confirm multiple tickets appear where the requirement clearly decomposes into multiple implementation units.
+
+## Workflow 8: Ticket Review And Editing
+
+### Acceptance Criteria
+
+- A user can inspect ticket candidates individually.
+- A user can edit ticket candidate content before export.
+- A user can split a broad ticket into multiple candidates.
+- A user can merge tickets that were over-split.
+- A user can edit dependency or ordering information.
+- A user can approve all ticket candidates or a subset.
+
+### Minimum Verification
+
+- Generate multiple ticket candidates.
+- Edit one ticket.
+- Split one ticket.
+- Merge two tickets.
+- Approve a subset for export.
+
+## Workflow 9: Linear Export
+
+### Acceptance Criteria
+
+- A project can store a valid Linear connection.
+- Approved ticket candidates can be exported to Linear.
+- Each export action is recorded as an export batch.
+- The system stores per-ticket export results.
+- Returned Linear issue identifiers are persisted.
+- Partial failure is visible and retryable.
+
+### Minimum Verification
+
+- Connect a Linear destination.
+- Export approved tickets.
+- Confirm Linear issues are created.
+- Simulate or trigger a partial failure and confirm retry behavior is available.
+
+## Workflow 10: Repository Context Ingestion
+
+### Acceptance Criteria
+
+- A project can connect a GitHub repository.
+- The system can recommend likely context sources.
+- A user can choose which context sources to include.
+- The system creates a repository context snapshot from approved sources.
+- Refinement can reference repository context without overriding direct user input.
+- Context-derived outputs retain lightweight source citation.
+
+### Minimum Verification
+
+- Connect a GitHub repository.
+- Select approved markdown or documentation files.
+- Run context ingestion.
+- Confirm a refinement session references ingested context and exposes the source citation.
+
+## Workflow 11: Failure Handling
+
+### Acceptance Criteria
+
+- AI provider failure does not corrupt requirement history.
+- Repository sync failure does not destroy the last known good context snapshot.
+- Linear export failure does not lose ticket candidate state.
+- Job retries can recover from transient external errors where appropriate.
+- The user sees actionable failure states rather than silent failure.
+
+### Minimum Verification
+
+- Simulate provider failure during refinement.
+- Simulate repository ingestion failure.
+- Simulate Linear export failure.
+- Confirm that state remains recoverable and visible in each case.
+
+## Workflow 12: Traceability And Auditability
+
+### Acceptance Criteria
+
+- A user can trace a ticket candidate back to its originating requirement.
+- The system stores persona invocation history.
+- The system stores readiness assessments over time.
+- The system stores export history and resulting Linear mappings.
+- Repository context snapshots are versioned rather than silently replaced.
+
+### Minimum Verification
+
+- Generate a ticket candidate and inspect its origin linkage.
+- Review prior readiness and persona history for the requirement.
+- Export the ticket and confirm the downstream mapping is recorded.
+
+## MVP Release Gate
+
+The MVP should not be considered release-ready until all of the following are true:
+
+- Workflows 1 through 9 pass end-to-end.
+- Repository context ingestion is functional for approved documents.
+- Core failure handling is verified for AI, repository, and Linear integration paths.
+- Traceability from requirement to exported Linear issue is demonstrably intact.
+- Workspace isolation is verified.
+
+## Out-Of-Scope For MVP Acceptance
+
+The following are explicitly not required for MVP acceptance:
+
+- Real-time collaborative editing
+- Multi-provider AI routing
+- Full repository semantic indexing
+- Non-GitHub repository providers
+- Non-Linear issue tracker support
+- Native mobile application support
