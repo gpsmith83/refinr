@@ -22,13 +22,13 @@ Each issue entry follows the same structure so a team can import or create issue
 
 ## Summary
 
-Define the repository bootstrap path, required toolchain, standard scripts, environment templates, and exact local verification steps so a new developer can start implementation without tribal knowledge.
+Use the approved stack in [mvp-stack.md](mvp-stack.md) as input and turn it into the repository bootstrap path, required toolchain, standard scripts, environment templates, and exact local verification steps a new developer needs.
 
 ## Execution Readiness
 
 - Prerequisites: none.
 - Local services: none required before this issue starts.
-- Environment and config: document the local environment templates, database connection settings, session configuration, and integration-related variables this repository will require.
+- Environment and config: document the local environment templates, database connection settings, session configuration, and integration-related variables this repository will require based on the approved stack in [mvp-stack.md](mvp-stack.md).
 - External access: identify any external accounts that later issues will require, but this issue should not depend on them being fully configured first.
 - Startup path: establish the repository-standard bootstrap and local startup commands for the team.
 - Validation path: verify that a developer can follow the documented bootstrap path from a fresh clone without prior project knowledge.
@@ -36,6 +36,7 @@ Define the repository bootstrap path, required toolchain, standard scripts, envi
 
 ## Acceptance Criteria
 
+- The repository bootstrap guidance is consistent with the approved technology choices and defaults documented in [mvp-stack.md](mvp-stack.md).
 - The repository contains a documented developer bootstrap path that assumes no prior project knowledge.
 - The required Node.js version and package manager are explicitly stated and enforced or validated by the repository tooling.
 - Standard scripts exist for development, build, lint, test, migration, and seed or equivalent local data setup workflows.

@@ -55,9 +55,12 @@ Shared execution readiness for this epic:
 Value:
 
 - Makes the repository implementable by a team starting from zero local knowledge.
+- Turns the approved MVP stack into a runnable repository baseline rather than leaving the stack as a set of abstract technology choices.
 
 Scope:
 
+- Use [mvp-stack.md](mvp-stack.md) as the source of truth for approved technology choices and deployment defaults.
+- Translate the approved stack into concrete repository conventions rather than reopening stack selection.
 - Define the repository structure for frontend, API, shared code, and worker runtime areas.
 - Choose and document the package manager and required Node.js version.
 - Create standard scripts for install, dev, build, lint, test, database migration, and seed workflows.
@@ -70,6 +73,7 @@ Dependencies:
 
 Acceptance:
 
+- The repository bootstrap guidance is consistent with the approved technology choices and defaults documented in [mvp-stack.md](mvp-stack.md).
 - The repository contains a documented developer bootstrap path that assumes no prior project knowledge.
 - The required Node.js version and package manager are explicitly stated and enforced or validated by the repository tooling.
 - Standard scripts exist for development, build, lint, test, migration, and seed or equivalent local data setup workflows.

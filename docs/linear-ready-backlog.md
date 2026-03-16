@@ -65,8 +65,9 @@ Until B-000 and B-006 establish the repository-standard commands, the milestone 
 - Area: `area:infra`
 - Type: `type:feature`
 - Depends on: none
-- Summary: Define the repository bootstrap path, required toolchain, standard scripts, environment templates, and exact local verification steps so a new developer can start implementation without tribal knowledge.
+- Summary: Use the approved stack in [mvp-stack.md](mvp-stack.md) as input and turn it into the repository bootstrap path, required toolchain, standard scripts, environment templates, and exact local verification steps a new developer needs.
 - Acceptance:
+  - The repository bootstrap guidance is consistent with the approved technology choices and defaults documented in [mvp-stack.md](mvp-stack.md).
   - The repository contains a documented developer bootstrap path that assumes no prior project knowledge.
   - The required Node.js version and package manager are explicitly stated and enforced or validated by the repository tooling.
   - Standard scripts exist for development, build, lint, test, migration, and seed or equivalent local data setup workflows.
