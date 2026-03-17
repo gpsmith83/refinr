@@ -1,0 +1,11 @@
+{
+  "name": "@refinr/web",
+  "private": true,
+  "scripts": {
+    "dev": "node -e \"console.log('web not scaffolded yet (B-001 will add Angular app)')\"",
+    "build": "node -e \"console.log('web not scaffolded yet (B-001 will add Angular app)')\"",
+    "lint": "node -e \"console.log('web not scaffolded yet (B-001 will add Angular lint)')\"",
+    "test": "node -e \"console.log('web not scaffolded yet (B-001 will add Angular tests)')\"",
+    "typecheck": "node -e \"console.log('web not scaffolded yet (B-001 will add TS typecheck)')\""
+  }
+}

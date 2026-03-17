@@ -22,6 +22,12 @@ The documentation has been split so that product definition, architecture, stack
 - [docs/initial-delivery-backlog.md](docs/initial-delivery-backlog.md): Initial INVEST-oriented MVP backlog.
 - [docs/linear-ready-backlog.md](docs/linear-ready-backlog.md): Derived tracker-oriented backlog artifact.
 
+## Developer Bootstrap
+
+Start here for local setup commands, scripts, and environment templates:
+
+- [docs/development.md](docs/development.md)
+
 ## Current Product Direction
 
 - Frontend: modern Angular

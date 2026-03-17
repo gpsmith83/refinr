@@ -212,6 +212,7 @@ Use this only when completion is blocked by missing required tools or missing au
     - If app-touching, run `launch-app` validation and capture/upload media via `github-pr-media` before handoff.
 6.  Re-check all acceptance criteria and close any gaps.
 7.  Before every `git push` attempt, run the required validation for your scope and confirm it passes; if it fails, address issues and rerun until green, then commit and push changes.
+  - Default repo validation harness: run `pnpm verify` and record the result in the workpad.
 8.  Attach PR URL to the issue (prefer attachment; use the workpad comment only if attachment is unavailable).
     - Ensure the GitHub PR has label `symphony` (add it if missing).
 9.  Merge latest `origin/main` into branch, resolve conflicts, and rerun checks.
@@ -257,6 +258,16 @@ Use this only when completion is blocked by missing required tools or missing au
    - Build a fresh plan/checklist and execute end-to-end.
 
 ## Completion bar before Human Review
+
+Before moving a ticket to `Human Review`, the workpad must include:
+
+- A `Validation` section with the exact command run and result.
+- Default required command for this repo: `pnpm verify`.
+- If `pnpm verify` cannot be run (for example missing secrets for an integration test), explicitly document why and what subset was run instead.
+
+Final message requirement:
+
+- Include a short `Validation` summary referencing the `pnpm verify` result (pass/fail) and any relevant output snippets.
 
 - Step 1/2 checklist is fully complete and accurately reflected in the single workpad comment.
 - Acceptance criteria and required ticket-provided validation items are complete.

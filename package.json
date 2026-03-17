@@ -1,0 +1,41 @@
+{
+  "name": "refinr",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@9.15.6",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "preinstall": "node scripts/check-toolchain.mjs",
+    "bootstrap": "corepack enable && pnpm install",
+    "verify": "pnpm format && pnpm lint && pnpm typecheck && pnpm build && pnpm test",
+    "lint": "pnpm -r lint",
+    "format": "prettier \"{apps,packages,scripts,infra}/**/*\" --check",
+    "format:write": "prettier \"{apps,packages,scripts,infra}/**/*\" --write",
+    "test": "pnpm -r test",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "dev": "concurrently -n api,worker,web -c blue,magenta,green \"pnpm dev:api\" \"pnpm dev:worker\" \"pnpm dev:web\"",
+    "dev:api": "pnpm --filter @refinr/api dev",
+    "dev:worker": "pnpm --filter @refinr/worker dev",
+    "dev:web": "pnpm --filter @refinr/web dev",
+    "db:up": "docker compose -f infra/docker-compose.db.yml up -d",
+    "db:down": "docker compose -f infra/docker-compose.db.yml down",
+    "db:ps": "docker compose -f infra/docker-compose.db.yml ps",
+    "db:logs": "docker compose -f infra/docker-compose.db.yml logs -f",
+    "db:migrate": "node scripts/db/migrate.mjs",
+    "db:seed": "node scripts/db/seed.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "concurrently": "^9.0.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.3",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3"
+  }
+}

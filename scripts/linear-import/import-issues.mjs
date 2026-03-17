@@ -7,7 +7,10 @@ import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DEFAULT_INPUT = path.resolve(__dirname, "../../docs/linear-import-ready-issues.md");
+const DEFAULT_INPUT = path.resolve(
+  __dirname,
+  "../../docs/linear-import-ready-issues.md",
+);
 const GRAPHQL_ENDPOINT = "https://api.linear.app/graphql";
 
 function printHelp() {
@@ -107,7 +110,9 @@ function parseArgs(argv) {
 }
 
 function extractInlineCodeValues(line) {
-  return Array.from(line.matchAll(/`([^`]+)`/g), (match) => match[1].trim()).filter(Boolean);
+  return Array.from(line.matchAll(/`([^`]+)`/g), (match) =>
+    match[1].trim(),
+  ).filter(Boolean);
 }
 
 function parseIssueEntry(entry) {
@@ -128,7 +133,9 @@ function parseIssueEntry(entry) {
     ? []
     : extractInlineCodeValues(dependsLine);
 
-  const bodyLines = lines.filter((line) => line !== labelsLine && line !== dependsLine);
+  const bodyLines = lines.filter(
+    (line) => line !== labelsLine && line !== dependsLine,
+  );
   while (bodyLines.length > 0 && bodyLines[0].trim() === "") {
     bodyLines.shift();
   }
@@ -141,7 +148,9 @@ function parseIssueEntry(entry) {
 
   const sourceIdMatch = entry.title.match(/^([A-Z]-\d+)\b/);
   if (!sourceIdMatch) {
-    throw new Error(`Issue heading does not start with a source identifier: ${entry.title}`);
+    throw new Error(
+      `Issue heading does not start with a source identifier: ${entry.title}`,
+    );
   }
 
   return {
@@ -195,27 +204,39 @@ function parseIssues(markdown) {
 }
 
 function normalizeMatchValue(value) {
-  return String(value ?? "").trim().toLowerCase();
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
 }
 
 function resolveUniqueMatch(items, selector, rawValue, description) {
   const target = normalizeMatchValue(rawValue);
-  const matches = items.filter((item) => selector(item).some((candidate) => normalizeMatchValue(candidate) === target));
+  const matches = items.filter((item) =>
+    selector(item).some(
+      (candidate) => normalizeMatchValue(candidate) === target,
+    ),
+  );
 
   if (matches.length === 0) {
     throw new Error(`No ${description} matched \"${rawValue}\".`);
   }
 
   if (matches.length > 1) {
-    const names = matches.map((item) => selector(item).find(Boolean)).join(", ");
-    throw new Error(`Multiple ${description}s matched \"${rawValue}\": ${names}`);
+    const names = matches
+      .map((item) => selector(item).find(Boolean))
+      .join(", ");
+    throw new Error(
+      `Multiple ${description}s matched \"${rawValue}\": ${names}`,
+    );
   }
 
   return matches[0];
 }
 
 function pickTeam(project, allTeams, teamArg) {
-  const projectTeams = Array.isArray(project?.teams?.nodes) ? project.teams.nodes : [];
+  const projectTeams = Array.isArray(project?.teams?.nodes)
+    ? project.teams.nodes
+    : [];
 
   if (teamArg) {
     return resolveUniqueMatch(
@@ -231,16 +252,26 @@ function pickTeam(project, allTeams, teamArg) {
   }
 
   if (projectTeams.length > 1) {
-    const choices = projectTeams.map((team) => `${team.key ?? team.name} (${team.id})`).join(", ");
-    throw new Error(`Project maps to multiple teams. Pass --team. Available teams: ${choices}`);
+    const choices = projectTeams
+      .map((team) => `${team.key ?? team.name} (${team.id})`)
+      .join(", ");
+    throw new Error(
+      `Project maps to multiple teams. Pass --team. Available teams: ${choices}`,
+    );
   }
 
-  throw new Error("Could not infer a team from the selected project. Pass --team explicitly.");
+  throw new Error(
+    "Could not infer a team from the selected project. Pass --team explicitly.",
+  );
 }
 
 function tryResolveMatch(items, selector, rawValue) {
   const target = normalizeMatchValue(rawValue);
-  const matches = items.filter((item) => selector(item).some((candidate) => normalizeMatchValue(candidate) === target));
+  const matches = items.filter((item) =>
+    selector(item).some(
+      (candidate) => normalizeMatchValue(candidate) === target,
+    ),
+  );
   return matches.length === 1 ? matches[0] : null;
 }
 
@@ -285,7 +316,11 @@ function hslToHex(hue, saturation, lightness) {
 
   const match = l - chroma / 2;
   return [red, green, blue]
-    .map((channel) => Math.round((channel + match) * 255).toString(16).padStart(2, "0"))
+    .map((channel) =>
+      Math.round((channel + match) * 255)
+        .toString(16)
+        .padStart(2, "0"),
+    )
     .join("")
     .toUpperCase();
 }
@@ -307,7 +342,9 @@ class LinearClient {
 
     if (!response.ok) {
       const text = await response.text();
-      throw new Error(`Linear API request failed with ${response.status}: ${text}`);
+      throw new Error(
+        `Linear API request failed with ${response.status}: ${text}`,
+      );
     }
 
     const payload = await response.json();
@@ -498,7 +535,9 @@ ${projectTeamsSelection}
     );
 
     if (result.errors.length > 0) {
-      const duplicate = result.message.toLowerCase().includes("already") || result.message.toLowerCase().includes("exists");
+      const duplicate =
+        result.message.toLowerCase().includes("already") ||
+        result.message.toLowerCase().includes("exists");
       if (duplicate) {
         return { skipped: true, reason: result.message };
       }
@@ -506,15 +545,26 @@ ${projectTeamsSelection}
     }
 
     if (!result.data.issueRelationCreate.success) {
-      throw new Error(`Failed to create dependency relation ${blockingIssueId} -> ${blockedIssueId}`);
+      throw new Error(
+        `Failed to create dependency relation ${blockingIssueId} -> ${blockedIssueId}`,
+      );
     }
 
     return { skipped: false };
   }
 }
 
-async function ensureLabels({ client, labels, teamId, existingLabels, createMissingLabels, dryRun }) {
-  const labelMap = new Map(existingLabels.map((label) => [normalizeMatchValue(label.name), label]));
+async function ensureLabels({
+  client,
+  labels,
+  teamId,
+  existingLabels,
+  createMissingLabels,
+  dryRun,
+}) {
+  const labelMap = new Map(
+    existingLabels.map((label) => [normalizeMatchValue(label.name), label]),
+  );
   const resolvedLabelIds = [];
   const missingLabels = [];
 
@@ -560,7 +610,9 @@ async function main() {
   }
 
   if (!options.apiKey) {
-    throw new Error("Missing Linear API key. Pass --api-key or set LINEAR_API_KEY.");
+    throw new Error(
+      "Missing Linear API key. Pass --api-key or set LINEAR_API_KEY.",
+    );
   }
 
   const markdown = await readFile(options.input, "utf8");
@@ -591,18 +643,24 @@ async function main() {
       "team",
     );
 
-    const projectLikeTeam = normalizeMatchValue(options.project) === normalizeMatchValue(options.team ?? options.project);
+    const projectLikeTeam =
+      normalizeMatchValue(options.project) ===
+      normalizeMatchValue(options.team ?? options.project);
     if (!projectLikeTeam) {
       throw new Error(`No project matched \"${options.project}\".`);
     }
   }
 
   const allLabels = await client.loadIssueLabels();
-  const teamLabels = allLabels.filter((label) => !label.team || label.team.id === team.id);
+  const teamLabels = allLabels.filter(
+    (label) => !label.team || label.team.id === team.id,
+  );
   const existingIssues = project
     ? await client.loadProjectIssues(project.id)
     : await client.loadTeamIssues(team.id);
-  const issuesByTitle = new Map(existingIssues.map((issue) => [issue.title, issue]));
+  const issuesByTitle = new Map(
+    existingIssues.map((issue) => [issue.title, issue]),
+  );
   const importedIssues = new Map();
   const skippedIssues = [];
   const warnings = [];
@@ -612,7 +670,9 @@ async function main() {
     console.log(`Target project: ${project.name} (${project.id})`);
   } else {
     console.log(`Target project: none matched; importing into team scope only`);
-    warnings.push(`No project matched \"${options.project}\". Falling back to team-only import for ${team.name}.`);
+    warnings.push(
+      `No project matched \"${options.project}\". Falling back to team-only import for ${team.name}.`,
+    );
   }
   console.log(`Target team: ${team.key ?? team.name} (${team.id})`);
   if (options.dryRun) {
@@ -630,14 +690,18 @@ async function main() {
     });
 
     if (missingLabels.length > 0) {
-      warnings.push(`${issue.sourceId}: missing labels not applied: ${missingLabels.join(", ")}`);
+      warnings.push(
+        `${issue.sourceId}: missing labels not applied: ${missingLabels.join(", ")}`,
+      );
     }
 
     if (options.skipExisting && issuesByTitle.has(issue.title)) {
       const existing = issuesByTitle.get(issue.title);
       importedIssues.set(issue.sourceId, existing);
       skippedIssues.push(`${issue.sourceId} -> ${existing.identifier}`);
-      console.log(`Skipping existing issue: ${issue.title} (${existing.identifier})`);
+      console.log(
+        `Skipping existing issue: ${issue.title} (${existing.identifier})`,
+      );
       continue;
     }
 
@@ -674,17 +738,24 @@ async function main() {
     for (const dependencySourceId of issue.dependsOn) {
       const dependency = importedIssues.get(dependencySourceId);
       if (!dependency) {
-        warnings.push(`${issue.sourceId}: dependency ${dependencySourceId} was not created or found; relation skipped`);
+        warnings.push(
+          `${issue.sourceId}: dependency ${dependencySourceId} was not created or found; relation skipped`,
+        );
         continue;
       }
 
       if (options.dryRun) {
         relationCount += 1;
-        console.log(`Would relate ${dependency.identifier} blocks ${dependent.identifier}`);
+        console.log(
+          `Would relate ${dependency.identifier} blocks ${dependent.identifier}`,
+        );
         continue;
       }
 
-      const relation = await client.createBlocksRelation(dependency.id, dependent.id);
+      const relation = await client.createBlocksRelation(
+        dependency.id,
+        dependent.id,
+      );
       if (!relation.skipped) {
         relationCount += 1;
       }
